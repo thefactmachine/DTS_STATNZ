@@ -1,0 +1,82 @@
+A <- 1:30
+A
+A * 2
+1:14
+1:9
+1:9 *2
+a<- 1:9 *2
+sum(a)
+1:9
+(1:9)*5
+1:500
+1:-670
+seq(1, 5, 0.5)
+1:23 ^ 3
+(1:23) ^ 3
+a <- (1:23) ^ 3
+a
+a *2
+a{2}
+a[3]
+x <- c(“a”, “b”, “c”, “d”)for (I in seq_along(x)) {	Print(x[i])}
+x <- c(“a”, “b”, “c”, “d”)
+x <- c('a', 'b', 'c', 'd')
+for (I in seq_along(x)) {	Print(x[i])}
+for (I in seq_along(x)) {	print(x[i])}
+for (i in seq_along(x)) {	print(x[i])}
+library('ggplot2')
+1:89
+bevs <- data.frame(cbind(name = c("Bill", "Llib"), drink = c("coffee", "tea", "cocoa", "water"), cost = seq(1:8)))
+bevs
+bevs$cost <- as.integer(bevs$cost)
+aggregate(cost ~ name + drink, data = bevs, sum)
+aggregate(cost ~ name + drink, data = bevs, mean)
+library(gbm)
+1:8
+1:8*2
+require('magrittr')
+dev.off()
+?dev.off
+library(reshape2)
+library(gridExtra)
+knitr
+library(knitr)
+library(shinyapps)
+library(shiny)
+library(dplyr)
+library(tidyr)
+library(stringr)
+x = c(12,34,23,11,34,45,12,11)
+length(x)
+diff(x,2)
+length(diff(x,2))
+1:34
+15 * 30
+230 * 30
+2500 * 2.19
+2500 * 2.19 / 4.3
+140 * 8
+42 + 30.5 + 40.5 + 35
+148 + 40
+188 * 110
+1200 * 1.1
+1200 * (183/155)
+print("hi there")
+# this is a comment
+rm(list = ls())#
+library(lubridate)#
+library(dplyr)#
+#
+setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
+options(stringsAsFactors = FALSE)#
+source('functions/fn_create_date.R')#
+source('functions/fn_create_whole_years.R')#
+#
+df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
+df_accomodation <- read.csv("data/vw_DTSVisitAccommodation.csv", header = TRUE)#
+#
+# create a quarter end date from quarter number and year#
+df_trips$QEDate <- fn_create_date(df_trips$TripQtr, df_trips$TripYear)#
+#
+df_whole_years <- fn_create_whole_years(df_trips)
+df_whole_years

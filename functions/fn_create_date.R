@@ -3,7 +3,7 @@ fn_create_date <- function(vct_q, vct_y) {
 	
 	# define a mapping from quarters to [day + month] combinations.
 	df_map <- data.frame(quarter = c(1,2,3,4), 
-		day_month = c("31-3", "30-6", "31-9", "31-12"))
+		day_month = c("31-3", "30-6", "30-9", "31-12"))
 	
 	vct_date <- 
 		# apply the mapping
