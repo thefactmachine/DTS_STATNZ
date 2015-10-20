@@ -1,4 +1,4 @@
-fn_calc_los_group <- function(vctNoNights) {
+fn_calc_los <- function(vctNoNights) {
 	vctReturn <- vector("character")
 	vctReturn <- rep(NA, length(vctNoNights))
 	aveDaysPerMonth <- 365.25 / 12
@@ -47,4 +47,3 @@ fn_calc_los_group <- function(vctNoNights) {
 
 }  # function
 
-aa <- fn_calc_log_group(c(3,16,35,64,100,200,400))
