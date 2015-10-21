@@ -5,7 +5,6 @@
 # called by an lapply function with various column combinations
 fn_create_comb_aggregates <- 
 	function(a_df_base_aggregates, a_vct_columns, a_sum_clause) {
-
 		df_return <- a_df_base_aggregates %>% 
 		# group_by various column combinations
 		group_by_(.dots = a_vct_columns) %>% 
