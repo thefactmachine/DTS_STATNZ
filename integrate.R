@@ -2,17 +2,27 @@
 rm(list = ls())
 
 # load some libaries 
-library(lubridate)
+#library(lubridate)
 library(dplyr)
+library(stringr)
 
 options(stringsAsFactors = FALSE)
 setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')
 
+# calculates "length of stay"
 source('functions/fn_calc_los.R')
+# creates a data.frame of column combinations for use in a group_by
 source('functions/fn_create_column_combinations.R')
-source('functions/fn_create_df_with_all.R')
+# uses column combinations to create various group_by
 source('functions/fn_create_comb_aggregates.R')
+# appends columns to a data.frame such that resultant df is always 8 columns wide
+source('functions/fn_create_df_with_all.R')
+# appends a data.frame with four columns
 source('functions/fn_create_year_end.R')
+# converts floating point number to text
+source('functions/fn_convert_to_text.R')
+# creates  yearend lookup table
+source('functions/fn_create_YE_lookup.R')
 
 
 
@@ -46,6 +56,12 @@ df_accomodation <- read.csv("data/vw_DTSVisitAccommodation.csv", header = TRUE)
 df_accomodation <- df_accomodation %>% select(TripID, AccommodationType, NoNights)
 # convert any NAs to zeros
 df_accomodation[is.na(df_accomodation$NoNights), "NoNights"] <- 0
+# clean up miss-spelling
+df_accomodation[df_accomodation$AccommodationType == 
+	"Employer provided accomodation", "AccommodationType"] <- 
+	"Employer provided accommodation"
+
+# calculate a column
 df_accomodation$LOS_Group <- fn_calc_los(df_accomodation$NoNights)
 
 
@@ -54,8 +70,11 @@ df_accomodation$LOS_Group <- fn_calc_los(df_accomodation$NoNights)
 df_trips_overnight <- df_trips %>% filter(TripType == "Overnight Trip") %>% 
 		select(c(TripIDNumber,TripType, TripYear,
 		TripQtr, DestinationRTO, RespondentWeight, SmoothedTripWeight)) 
+
+# clean up some columns
 df_trips_overnight[is.na(df_trips_overnight$RespondentWeight), "RespondentWeight"] <- 0
 df_trips_overnight[is.na(df_trips_overnight$SmoothedTripWeight), "SmoothedTripWeight"] <- 0
+df_trips_overnight[df_trips_overnight$DestinationRTO == "Other   ", "DestinationRTO"] <- "Other"
 # clean up
 rm(df_trips, fn_calc_los)
 
@@ -111,18 +130,25 @@ df_base_aggregates <- cbind(YE, df_four_quarters) %>%
 	Total_Nights = sum(TotalNights), Total_Respondents = sum(TotalRespondents)) %>%  
 	filter(YE %in% df_YE_all$YE)
 
+# Following are reconciliations checks. To be commented in / out
+# options(digits = 22)
+# df_base_aggregates %>% ungroup() %>% 
+#	summarise (Total_Visitors =  sum(Total_Visitors), Total_Trips = sum(Total_Trips), 
+#	Total_Nights = sum(Total_Nights), Total_Respondents = sum(Total_Respondents))
+
+
+
 # clean up
 rm(df_combined, df_four_quarters, df_YE_all, YE)
 
 
+
 # (6) CREATE various aggregate combinations
-# PREAMBLE for (6)
+# PREAMBLE for  (6)
 # There are four dimenions columns. The total number of group_by combinations of these are:
 # 2^4 = 16.  1 of these has been previously created (see 'df_base_aggregates' )...
 # the remaining 15 combinations are created below.  Of these 15 combinations, 14 are created
 # programmatically (see 6.5). The remaining combination is created as a single line of code (see 6.6)
-
-
 
 # (6.1) get the dimenions names
 vct_dim_names <- names(df_base_aggregates)[1:4]
@@ -155,15 +181,58 @@ df_totals <- df_base_aggregates %>% ungroup() %>%
 				summarise_(.dots = lst_sum_clause) %>% 
 				fn_create_df_with_all(vct_dim_names, vct_col_sort)
 # clean up
-rm(agg_names, fn_create_column_combinations, fn_create_comb_aggregates, fn_create_df_with_all)
-rm(fn_create_year_end, lst_aggregations, lst_sum_clause, vct_col_sort, vct_dim_names)
+rm(fn_create_column_combinations, fn_create_comb_aggregates, fn_create_df_with_all)
+rm(fn_create_year_end, lst_aggregations, lst_sum_clause, vct_col_sort)
 
 # (7) combine all aggregates into a single data frame
 # total rows = 86511 + 71114 + 1 = 157626
 df_consolidated <- bind_rows(df_base_aggregates, df.aggregations, df_totals)
 
+
+# (7.1) convert numeric columns to text with 0 decimal places
+df_fin <- sapply(df_consolidated[, agg_names], function(x) fn_convert_to_text(x)) %>%
+ 			# convert sapply's matrix to a data frame
+ 			as.data.frame() %>%
+ 			# club the original columns together with the new text columns
+ 			bind_cols(df_consolidated[, vct_dim_names, ], .)
+
 #clean up
 rm(df_base_aggregates, df_totals, df.aggregations, lst_combinations)
+rm(agg_names, fn_convert_to_text, vct_dim_names)
 
 
- 
+# (8) LOOKUPS
+# (8.1) import lookup tables and create lookup for year end
+df_lu_acccom_type <- read.csv("outputs/DimenLookupAccommodationTypeAccommodation.csv", header = TRUE)
+df_lu_dest_rto <- read.csv("outputs/DimenLookupDestinationRTOAccommodation.csv", header = TRUE)
+df_lu_LOS <- read.csv("outputs/DimenLookupLOS_groupAccommodation.csv", header = TRUE)
+df_lu_YE <- fn_create_YE_lookup(df_fin$YE)
+
+# (8.2) based on the lookup tables created, replace string values with numeric lookups for the...
+# 4 dimensions
+df_fin_lu <- df_fin %>% 
+			inner_join(df_lu_LOS, by = c("LOS_Group" = "Description")) %>% 
+			mutate(LOS_Group = Code) %>% 
+			select(-c(Code, SortOrder)) %>% 
+		
+			inner_join(df_lu_dest_rto, by = c("DestinationRTO" = "Description")) %>% 
+			mutate(DestinationRTO = Code) %>% 
+			select(-c(Code, SortOrder)) %>%
+		
+			inner_join(df_lu_acccom_type, by = c("AccommodationType" = "Description")) %>% 
+			mutate(AccommodationType = Code) %>% 
+			select(-c(Code, SortOrder)) %>%
+ 		
+ 			inner_join(df_lu_YE, by = c("YE" = "YE")) %>% 
+			mutate(YE = Code) %>% 
+			select(-c(Code, SortOrder, Description)) %>%
+		
+			rename(Year_ending = YE)
+
+# clean up
+rm(df_consolidated, fn_create_YE_lookup)
+
+# WORKOUT  Parent / Child
+
+
+

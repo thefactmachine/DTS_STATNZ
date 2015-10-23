@@ -1,895 +1,1399 @@
-dim(mat1)
-dim(mat2)
-dim(mat3)
-dim(mat4)
-mat3[,1]
-xx <- mat3[,1]
-class(xx)
-apply(mat3, 2, function(x) x)
-mat3
-apply(mat3, 2, function(x) x[1])
-ncol(mat3)
-seq_len(ncol(mat3))
-seq_len(4)
-seq_len(3)
-seq_along(3)
-sequence <- 1:4
-sequence
-lapply(sequence, function(x) x)
-lapply(sequence, function(x) mat3[, x])
-lstA <- lapply(sequence, function(x) mat3[, x])
-lapply(sequence, function(x), combn(dim_names, x))
-lapply(sequence, function(x) combn(dim_names, x))
-lst_combination_mat <- lapply(seq_len(length(dim_names)), function(x) combn(dim_names, x))
-lst_combination_mat[[2]]
-seq_along(lst_combination_mat)
-lapply(seq_along(lst_combination_mat), function(x) x)
-lapply(seq_along(lst_combination_mat), function(x) lst_combination_mat[[x]] )
-lst_test <- list(one = c('dogs', 'cats', 'zebra'), two = c('aust', 'nz', 'usa'), three = c('rainy', 'cloudy', 'hurricane', 'sunny'))
-lst_test
-lst_test[[1]]
-length(lst_test[[1]])
-fn_length <- function(lst_arg) {#
-	return(length(lst_arg))#
-}
-lapply(seq_along(lst_test), function(x) x)
-fn_length(lst_test[[2]])
-lapply(seq_along(lst_test), function(x) lst_test[[x]])
-lapply(seq_along(lst_test), function(x) fn_length(lst_test[[x]]))
-lst_test <- list(one = c('dogs', 'cats', 'zebra'), two = c('aust', 'nz'), three = c('rainy', 'cloudy', 'hurricane', 'sunny'))#
-#
-fn_length <- function(lst_arg) {#
-	return(length(lst_arg))#
-}#
-#
-lapply(seq_along(lst_test), function(x) fn_length(lst_test[[x]]))
-lapply(seq_along(lst_test), fn_length(lst_test[[x]]))
-fn_dim <- function(lst_arg) {#
-	return(dim(lst_arg))#
-}
-lst_combination_mat <- lapply(seq_len(length(dim_names)), function(x) combn(dim_names, x))
-lapply(seq_along(lst_combination_mat), function(x) fn_dim(lst_combination_mat[[x]]))
-lapply(seq_along(lst_combination_mat), function(x) fn_dim(lst_combination_mat[[x]]))
-mat3
-lapply(seq_along(mat3), function(x) x)
-lapply(seq_along(ncols(mat3)), function(x) x)
-lapply(seq_length(ncol(mat3)), function(x) x)
-ncol(mat3)
-seq_len(ncol(mat3))
-lapply(seq_len(ncol(mat3)), function(x) x)
-lapply(seq_len(ncol(mat3)), function(x) mat3[,x])
-fn_cols_to_vectas <- function(arg_mat) {#
-	col_sequence <- seq_len(ncol(arg_mat))#
-	vct_return <- lapply(col_sequence , function(x) arg_mat[,x])#
-	return(vct_return)#
-}
-fn_cols_to_vectas <- function(arg_mat) {#
-	col_sequence <- seq_len(ncol(arg_mat))#
-	vct_return <- lapply(col_sequence , function(x) arg_mat[,x])#
-	return(vct_return)#
-}
-lapply(seq_along(lst_combination_mat), function(x) fn_cols_to_vectas(lst_combination_mat[[x]]))
-zzz <- lapply(seq_along(lst_combination_mat), function(x) fn_cols_to_vectas(lst_combination_mat[[x]]))
-zzz
-unlist(zzz)
-aaa <- unlist(zzz)
-class(aaa)
-combn(dim_names,3)
-mat_generic <- combn(dim_names, 3)
-mat_generic
-seqzzz <- seq_len(ncol(mat_generic))
-seqzzz
-lapply(seqzzz, function(x) mat_generic[,x])
-fn_combination <- function(a_vct_names, a_int_n) {#
-	mat <- combn(a_vct_names, a_int_n)#
-	col_seq <- seq_len(ncol(mat))#
-	lst_return <- lapply(col_seq, function(x) mat[,x])#
-	return(lst_return)	#
-}
-lst_combination_mat <- lapply(seq_len(length(dim_names)), function(x) fn_combination(dim_names, x))
-lst_combination_mat
-unlist(lst_combination_mat)
-YE
-lst_combination_mat
-aa <- unlist(lst_combination_mat)
-class(aa)
-str(aa)
-aa <- list(unlist(lst_combination_mat))
-str(aa)
-dim(lst_combination_mat)
-length(lst_combination_mat)
-lst_combination_mat <- sapply(seq_len(length(dim_names)), function(x) fn_combination(dim_names, x))
-lst_combination_mat
-do.call(c, unlist(lst_combination_mat, recursive=FALSE))
-do.call(c, unlist(lst_combination_mat, recursive=FALSE))
-lst_combination_mat
-unlist(lst_combination_mat, recursive=FALSE)
-abc <- unlist(lst_combination_mat, recursive=FALSE)
-class(abc)
-vct_names <- names(df_four_quarters)[1:2]
-vct_names
-dim_names <- names(df_four_quarters)[1:4]
-dim_names
-combn(dim_names, 2)
-combn(dim_names, 1)
-combn(dim_names, 3)
-combn(dim_names, 4)
-fn_combination <- function(a_vct_names, a_int_n) {#
-	mat <- combn(a_vct_names, a_int_n)#
-	col_seq <- seq_len(ncol(mat))#
-	lst_return <- lapply(col_seq, function(x) mat[,x])#
-	return(lst_return)	#
-}
-lst_combination_mat <- lapply(seq_len(length(dim_names)), function(x) fn_combination(dim_names, x))
-lst_combination_mat
-unlist(lst_combination_mat, recursive=FALSE)
-source('functions/fn_create_column_combinations.R')
-fn_create_column_combinations
-source('functions/fn_create_column_combinations.R')
-fn_create_column_combinations(c("mark", "allan", "hatcher"))
-source('functions/fn_create_column_combinations.R')#
-fn_create_column_combinations(c("mark", "allan", "hatcher"))
-dim_names <- names(df_four_quarters)[1:4]#
-#
-lst_combinations <- fn_create_column_combinations(dim_names)
-lst_combinations
-lst_combinations[[2]]
-lst_combinations[[4]]
-lst_combinations[[6]]
-zzz <- lst_combinations[[6]]
-class(zzz)
-qq <- df_four_quarters %>% group_by_(.dots = lst_combinations[[6]]) %>% summarise(totRes = sum(TotalRespondents))
-qq
-testName <- lst_combinations[[6]]
-testName
-base::setdiff(testName, dim_names)
-base::setdiff(dim_names, testName)
-vct_dim_names <- names(df_four_quarters)[1:4]#
-#
-lst_combinations <- fn_create_column_combinations(vct_dim_names)#
-#
-qq <- df_four_quarters %>% group_by_(.dots = lst_combinations[[6]]) %>% summarise(totRes = sum(TotalRespondents))#
-#================================#
-#
-vct_testName <- lst_combinations[[6]]#
-#
-base::setdiff(dim_names, vct_testName)
-vct_testName
-nrow(qq)
-vct_testName <- lst_combinations[[6]]#
-#
-vct_dim_excluded <- base::setdiff(dim_names, vct_testName)#
-int_rows <- nrow(qq)
-vct_dim_excluded
-int_rows
-rep("mark", 3)
-?expand.grid
-?data.frame
-?assign
-length(vct_dim_excluded) * int_rows
-rep("All", 20)
-vct_num_cells <- length(vct_dim_excluded) * int_rows#
-vct_cell_values <- rep("All", vct_num_cells)
-vct_cell_values
-matrix(vct_cell_values, nrow = int_rows)
-colnames(mat) <- vct_dim_excluded
-mat <- matrix(vct_cell_values, nrow = int_rows)
-colnames(mat) <- vct_dim_excluded
-head(mat)
-df <- as.data.frame(mat)
-head(df)
-qq <- df_four_quarters %>% group_by_(.dots = lst_combinations[[6]]) %>% summarise(totRes = sum(TotalRespondents))#
-#================================#
-#
-vct_testName <- lst_combinations[[6]]#
-#
-vct_dim_excluded <- base::setdiff(dim_names, vct_testName)#
-int_rows <- nrow(qq)#
-#
-vct_num_cells <- length(vct_dim_excluded) * int_rows#
-vct_cell_values <- rep("All", vct_num_cells)#
-mat <- matrix(vct_cell_values, nrow = int_rows)#
-colnames(mat) <- vct_dim_excluded#
-df_all <- as.data.frame(mat)
-df_combined <- df_all %>% bind_cols(qq)
-head(df_combined)
-df_combined <- df_all %>% bind_cols(qq) %>% select(YE, LOS_Group, DestinationRTO, AccomodationType, totRes)
-df_combined <- df_all %>% bind_cols(qq) %>% select(YE, LOS_Group, DestinationRTO, AccommodationType, totRes)
-head(df_combined)
-nrow(df_combined)
-vct_col_sort <- c("YE", "LOS_Group", "DestinationRTO", "AccommodationType", "totRes)
-)
-))
-vct_col_sort <- c("YE", "LOS_Group", "DestinationRTO", "AccommodationType", "totRes")
-vct_col_sort <- c("YE", "LOS_Group", "DestinationRTO", "AccommodationType", "totRes")
-df_combined <- df_all %>% bind_cols(qq) %>% select_(.dots = vct_col_sort)
-head(df_combined)
-source('functions/fn_create_df_with_all.R')
-fn_create_df_with_all
-head(qq)
-xxx <- fn_create_df_with_all(vct_dim_names, qq, vct_col_sort)
-head(xx)
-head(xxx)
-lst_combinations
-qq <- df_four_quarters %>% group_by_(.dots = lst_combinations[[15]]) %>% summarise(totRes = sum(TotalRespondents))#
-#
-nrow(qq)
-vct_col_sort <- c("YE", "LOS_Group", "DestinationRTO", "AccommodationType", "totRes")[-4]
-vct_col_sort
-vct_col_sort <- c("YE", "LOS_Group", "DestinationRTO", "AccommodationType", "totRes")[-5]
-combn(vct_col_sort, 4)
-source('functions/fn_create_column_combinations.R')
-lst_combinations <- fn_create_column_combinations(vct_dim_names)
-lst_combinations
-agg_names <- c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents")
-setNames
-??setNames
-lst_aggregations <- list("sum(TotalVisitors)", "sum(TotalTrips)", "sum(TotalNights)", "sum(TotalRespondents)")
-lst_aggregations
-lst_aggregations <- list("sum(TotalVisitors)", "sum(TotalTrips)", #
-	"sum(TotalNights)", "sum(TotalRespondents)")#
-#
-agg_names <- c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents")
-qqb <- df_four_quarters %>% group_by_(.dots = lst_combinations[[15]]) %>% #
-		summarise_(.dots = setNames(lst_aggregations, agg_names))
-qqb <- df_four_quarters %>% group_by_(.dots = lst_combinations[[10]]) %>% #
-		summarise_(.dots = setNames(lst_aggregations, agg_names))
-qqb
-vct_dim_names <- names(df_four_quarters)[1:4]#
-#
-lst_aggregations <- list("sum(TotalVisitors)", "sum(TotalTrips)", #
-	"sum(TotalNights)", "sum(TotalRespondents)")#
-#
-agg_names <- c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents")#
-#
-vct_col_sort <- c(vct_dim_names, agg_names)
-vct_col_sort
-df_base_aggregates <- cbind(YE, df_four_quarters) %>%#
-	select(-c(YEDec, YESep, YEJun, YEMar, QEDate))  %>%#
-	group_by(YE, LOS_Group, DestinationRTO, AccommodationType) %>%#
-	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
-	TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents)) %>%  #
-	filter(YE %in% df_YE_all$YE)
-list = ls()#
-library(lubridate)#
-library(dplyr)#
-#
-options(stringsAsFactors = FALSE)#
-setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
-source('functions/fn_create_date.R')#
-source('functions/fn_create_whole_years.R')#
-source('functions/fn_calc_lagged_date.R')#
-source('functions/fn_calculate_component_quarters.R')#
-source('functions/fn_calc_los.R')#
-source('functions/fn_create_year_end.R')#
-source('functions/fn_create_column_combinations.R')#
-source('functions/fn_create_df_with_all.R')#
-# load some data#
-df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
-df_accomodation <- read.csv("data/vw_DTSVisitAccommodation.csv", header = TRUE)#
-# create a quarter end date from quarter number and year#
-df_trips$QEDate <- fn_create_date(df_trips$TripQtr, df_trips$TripYear)#
-#
-# create a data frame of unique whole years (there are 53)#
-df_wy <- df_trips %>% #
-		fn_create_whole_years() %>% #
-		# creates four columns of year ends#
-		fn_create_year_end()#
-vct_wy <-  unique(c(df_wy$YEMar, df_wy$YEJun, df_wy$YESep, df_wy$YEDec))#
-# a specific year end consists of 4 component quarters. These are time contiguous  (there are 56)#
-#vct_component_quarters <- fn_calculate_component_quarters(df_whole_years$whole_year)#
-# delete uneeded columns & include only "Overnight trip" as.. these have associated Accomodation values#
-df_trips <- df_trips %>% select(c(SurveyResponseID,TripIDNumber,TripType, QEDate,TripYear,#
-		TripQtr, DestinationRTO, RespondentWeight, SmoothedTripWeight)) %>%#
-		filter(TripType == "Overnight Trip")#
-# add 4 extra columns. These will be used in group by calculations#
-df_trips <- fn_create_year_end(df_trips)#
-df_YE_Mar <- df_trips %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
-df_YE_Jun <- df_trips %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
-df_YE_Sep <- df_trips %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
-df_YE_Dec <- df_trips %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
-df_YE_all <- df_YE_Mar %>% bind_rows(df_YE_Jun) %>% #
-	bind_rows(df_YE_Sep) %>% bind_rows(df_YE_Dec) %>% group_by(YE) %>% #
-	summarise(count = n()) %>% filter(count == 4) %>% select(YE)#
-# include only the necessary stuff for df_accomodation#
-df_accomodation <- df_accomodation %>% select(TripID, AccommodationType, NoNights)#
-#
-# calculate length of stay group#
-df_accomodation$LOS_Group <- fn_calc_los(df_accomodation$NoNights)#
-# combine the two data frames into one, do some renaming, grouping and aggregating#
-df_combined <- df_trips %>% #
-	inner_join(df_accomodation, by = c("TripIDNumber"  = "TripID")) %>% #
-	mutate(TotalNights = NoNights * SmoothedTripWeight, TotalRespondents = 1) %>%#
-	rename(TotalVisitors = RespondentWeight, TotalTrips = SmoothedTripWeight) %>%#
-	select(YEDec, YESep, YEJun, YEMar, QEDate, LOS_Group, DestinationRTO, #
-		AccommodationType, TotalVisitors, TotalTrips, TotalNights, TotalRespondents) %>%#
-	group_by(YEDec, YESep, YEJun, YEMar, QEDate, LOS_Group, DestinationRTO, AccommodationType ) %>%#
-	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
-		TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents))#
-# create a vector of 4 different columns stacked on top of each other#
-YE <- c(df_combined$YEDec, df_combined$YESep, df_combined$YEJun, df_combined$YEMar)#
-#
-# duplicate the same data frame 4 time and stack on top of each other (158188 rows)#
-df_four_quarters <- rbind(df_combined, df_combined, df_combined, df_combined)#
-# combine the previously created vector with the stacked data frames #
-# unfiltered is 93734 rows, filtered is 86511 rows#
-df_four_quarters <- cbind(YE, df_four_quarters) %>%#
-	select(-c(YEDec, YESep, YEJun, YEMar, QEDate))  %>%#
-	group_by(YE, LOS_Group, DestinationRTO, AccommodationType) %>%#
-	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
-	TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents)) %>%  #
-	filter(YE %in% df_YE_all$YE)
-list = ls()#
-library(lubridate)#
-library(dplyr)#
-#
-options(stringsAsFactors = FALSE)#
-setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
-source('functions/fn_create_date.R')#
-source('functions/fn_create_whole_years.R')#
-source('functions/fn_calc_lagged_date.R')#
-source('functions/fn_calculate_component_quarters.R')#
-source('functions/fn_calc_los.R')#
-source('functions/fn_create_year_end.R')#
-source('functions/fn_create_column_combinations.R')#
-source('functions/fn_create_df_with_all.R')#
-# load some data#
-df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
-df_accomodation <- read.csv("data/vw_DTSVisitAccommodation.csv", header = TRUE)#
-# create a quarter end date from quarter number and year#
-df_trips$QEDate <- fn_create_date(df_trips$TripQtr, df_trips$TripYear)#
-#
-# create a data frame of unique whole years (there are 53)#
-df_wy <- df_trips %>% #
-		fn_create_whole_years() %>% #
-		# creates four columns of year ends#
-		fn_create_year_end()#
-vct_wy <-  unique(c(df_wy$YEMar, df_wy$YEJun, df_wy$YESep, df_wy$YEDec))#
-# a specific year end consists of 4 component quarters. These are time contiguous  (there are 56)#
-#vct_component_quarters <- fn_calculate_component_quarters(df_whole_years$whole_year)#
-# delete uneeded columns & include only "Overnight trip" as.. these have associated Accomodation values#
-df_trips <- df_trips %>% select(c(SurveyResponseID,TripIDNumber,TripType, QEDate,TripYear,#
-		TripQtr, DestinationRTO, RespondentWeight, SmoothedTripWeight)) %>%#
-		filter(TripType == "Overnight Trip")#
-# add 4 extra columns. These will be used in group by calculations#
-df_trips <- fn_create_year_end(df_trips)#
-df_YE_Mar <- df_trips %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
-df_YE_Jun <- df_trips %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
-df_YE_Sep <- df_trips %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
-df_YE_Dec <- df_trips %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
-df_YE_all <- df_YE_Mar %>% bind_rows(df_YE_Jun) %>% #
-	bind_rows(df_YE_Sep) %>% bind_rows(df_YE_Dec) %>% group_by(YE) %>% #
-	summarise(count = n()) %>% filter(count == 4) %>% select(YE)#
-# include only the necessary stuff for df_accomodation#
-df_accomodation <- df_accomodation %>% select(TripID, AccommodationType, NoNights)#
-#
-# calculate length of stay group#
-df_accomodation$LOS_Group <- fn_calc_los(df_accomodation$NoNights)#
-# combine the two data frames into one, do some renaming, grouping and aggregating#
-df_combined <- df_trips %>% #
-	inner_join(df_accomodation, by = c("TripIDNumber"  = "TripID")) %>% #
-	mutate(TotalNights = NoNights * SmoothedTripWeight, TotalRespondents = 1) %>%#
-	rename(TotalVisitors = RespondentWeight, TotalTrips = SmoothedTripWeight) %>%#
-	select(YEDec, YESep, YEJun, YEMar, QEDate, LOS_Group, DestinationRTO, #
-		AccommodationType, TotalVisitors, TotalTrips, TotalNights, TotalRespondents) %>%#
-	group_by(YEDec, YESep, YEJun, YEMar, QEDate, LOS_Group, DestinationRTO, AccommodationType ) %>%#
-	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
-		TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents))#
-# create a vector of 4 different columns stacked on top of each other#
-YE <- c(df_combined$YEDec, df_combined$YESep, df_combined$YEJun, df_combined$YEMar)#
-#
-# duplicate the same data frame 4 time and stack on top of each other (158188 rows)#
-df_four_quarters <- rbind(df_combined, df_combined, df_combined, df_combined)
-df_base_aggregates <- cbind(YE, df_four_quarters) %>%#
-	select(-c(YEDec, YESep, YEJun, YEMar, QEDate))  %>%#
-	group_by(YE, LOS_Group, DestinationRTO, AccommodationType) %>%#
-	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
-	TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents)) %>%  #
-	filter(YE %in% df_YE_all$YE)
-vct_dim_names <- names(df_base_aggregates)[1:4]#
-#
-lst_aggregations <- list("sum(TotalVisitors)", "sum(TotalTrips)", #
-	"sum(TotalNights)", "sum(TotalRespondents)")#
-#
-agg_names <- c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents")#
-#
-vct_col_sort <- c(vct_dim_names, agg_names)
-lst_combinations <- fn_create_column_combinations(vct_dim_names)
-qqb <- df_base_aggregates %>% group_by_(.dots = lst_combinations[[10]]) %>% #
-		summarise_(.dots = setNames(lst_aggregations, agg_names))
-xxx <- fn_create_df_with_all(vctdim_names, qqb, vct_col_sort)
-qqb
-head(df_base_aggregates)
+head(df_consolidated)
+head(df_consolidated$DestinationRTO)
+xcxc <- lapply(df_consolidated[, agg_names], function(x)  fn_convert_number_to_text(x) )
+class(xcxc)
+xcxc <- sapply(df_consolidated[, agg_names], function(x)  fn_convert_number_to_text(x) )
+class(xcxc)
+xcxc <- as.data.frame(sapply(df_consolidated[, agg_names], function(x)  fn_convert_number_to_text(x) ))
+class(xcxc)
+head(xcxc)
+str(xcxc)
+source('functions/fn_convert_to_text.R')
+xcxc <- sapply(df_consolidated[, agg_names], function(x) fn_convert_to_text(x) )
+?tbl_df
+xcxc <- sapply(df_consolidated[, agg_names], function(x) fn_convert_to_text(x)) %>%#
+ 			tbl_df()
+xcxc <- sapply(df_consolidated[, agg_names], function(x) fn_convert_to_text(x)) %>%#
+ 			as.data.frame()
+class(xcxc)
+head(xcxc)
+head(df_consolidated[, agg_names])
+head(df_consolidated[, -agg_names])
+head(df_consolidated[, -(agg_names)])
+df_consolidated %>% select(-agg_names)
+df_consolidated %>% select(-c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents"))
+df_consolidated %>% select(agg_names)
+df_consolidated %>% select_(agg_names)
+agg_names
+df_consolidated %>% select_(.dots = agg_names)
+df_consolidated %>% select_(.dots = agg_names)
 vct_dim_names
-fn_create_df_with_all <- #
-	function(a_vct_all_dim, df_sans_all, vct_col_sort) {#
-	# receives a data.frame with N dimensions from a total of T dimensions#
-	# where (N <= T). This function creates the missing dimensions where each#
-	# row will have the value "All".#
-#
-	# what are the names of the missing dimensions?#
-	vct_dim_excluded <- base::setdiff(dim_names, vct_testName)#
-	int_rows <- nrow(df_sans_all)#
-	# number of cells in a matrix = number of columsns * number of rows#
-	vct_num_cells <- length(vct_dim_excluded) * int_rows#
-	# create a matrix and name the columns#
-	vct_cell_values <- rep("All", vct_num_cells)#
-	mat <- matrix(vct_cell_values, nrow = int_rows)#
-	colnames(mat) <- vct_dim_excluded#
-#
-	# create a data.frame from the matrix#
-	df_all <- as.data.frame(mat)#
-#
-	df_combined <- df_all %>% bind_cols(df_sans_all) %>% #
-		select_(.dots = vct_col_sort)#
-#
-	return(df_combined)#
-}
-xxx <- fn_create_df_with_all(vctdim_names, qqb, vct_col_sort)
-xxx <- fn_create_df_with_all(vct_dim_names, qqb, vct_col_sort)
-vct_dim_names
-base::setdiff(vct_dim_names, names(qqb))
-fn_create_df_with_all <- #
-	function(a_vct_all_dim, df_sans_all, vct_col_sort) {#
-	# receives a data.frame with N dimensions from a total of T dimensions#
-	# where (N <= T). This function creates the missing dimensions where each#
-	# row will have the value "All".#
-#
-	# what are the names of the missing dimensions?#
-	vct_dim_excluded <- base::setdiff(a_vct_all_dim, names(df_sans_all))#
-	int_rows <- nrow(df_sans_all)#
-	# number of cells in a matrix = number of columsns * number of rows#
-	vct_num_cells <- length(vct_dim_excluded) * int_rows#
-	# create a matrix and name the columns#
-	vct_cell_values <- rep("All", vct_num_cells)#
-	mat <- matrix(vct_cell_values, nrow = int_rows)#
-	colnames(mat) <- vct_dim_excluded#
-#
-	# create a data.frame from the matrix#
-	df_all <- as.data.frame(mat)#
-#
-	df_combined <- df_all %>% bind_cols(df_sans_all) %>% #
-		select_(.dots = vct_col_sort)#
-#
-	return(df_combined)#
-}
-xxx <- fn_create_df_with_all(vct_dim_names, qqb, vct_col_sort)
-head(xxx)
-nrow(xxx)
-source('functions/fn_create_df_with_all.R')
-xxx <- fn_create_df_with_all(vct_dim_names, qqb, vct_col_sort)
-lst_combinations
-length(lst_combinations)
-source('functions/fn_create_df_with_all.R')
-fn_create_df_with_all
-xxx <- fn_create_df_with_all(qqb, vct_dim_names, vct_col_sort)
-nrow(xxx)
-qqaaa <- df_base_aggregates %>% group_by_(.dots = lst_combinations[[10]]) %>% #
-		summarise_(.dots = setNames(lst_aggregations, agg_names)) %>% #
-		fn_create_df_with_all(vct_dim_names, vct_col_sort)
-nrow(qqaaa)
-head(qqaaa)
-lapply(lst_combinations, function(x) x)
-fn_create_combination_aggregates <- function(a_df_base_aggregates, vct_columns) {#
-	df_return <- a_df_base_aggregates %>% #
-	# group_by various column combinations#
-	group_by_(.dots = lst_combinations[[10]]) %>% #
-	# create totals for 4 measure columns#
-	summarise_(.dots = setNames(lst_aggregations, agg_names)) %>% #
-	# fill is missing columns with the value "All"#
-	fn_create_df_with_all(vct_dim_names, vct_col_sort)#
-	return(df_return)#
-}
-fn_create_combination_aggregates(df_base_aggregates, lst_combinations[[10]])
-aaaaa <- lapply(lst_combinations, function(x) fn_create_combination_aggregates(df_base_aggregates, x))
-bbb <- lapply(lst_combinations, function(x) fn_create_combination_aggregates(df_base_aggregates, x))
-bbb
-bbb <- lapply(lst_combinations, function(x) fn_create_combination_aggregates(df_base_aggregates, x))
-length(bbb)
-class(bbb)
-bbb[[1]]
-head(bbb[[1]])
-head(bbb[[2]])
-head(bbb[[3]])
-fn_create_combination_aggregates <- function(a_df_base_aggregates, a_vct_columns) {#
-	df_return <- a_df_base_aggregates %>% #
-	# group_by various column combinations#
-	group_by_(.dots = a_vct_columns) %>% #
-	# create totals for 4 measure columns#
-	summarise_(.dots = setNames(lst_aggregations, agg_names)) %>% #
-	# fill is missing columns with the value "All"#
-	fn_create_df_with_all(vct_dim_names, vct_col_sort)#
-	return(df_return)#
-}
-bbb <- lapply(lst_combinations, function(x) fn_create_combination_aggregates(df_base_aggregates, x))
-head(bbb[[1]])
-head(bbb[[2]])
-head(bbb[[3]])
-head(bbb[[4]])
-head(bbb[[5]])
-setNames(lst_aggregations, agg_names)
-fn_create_combination_aggregates <- #
-	function(a_df_base_aggregates, a_vct_columns, a_sum_clause) {#
-		df_return <- a_df_base_aggregates %>% #
-		# group_by various column combinations#
-		group_by_(.dots = a_vct_columns) %>% #
-		# create totals for 4 measure columns#
-		summarise_(.dots = a_sum_clause) %>% #
-		# fill is missing columns with the value "All"#
-		fn_create_df_with_all(vct_dim_names, vct_col_sort)#
-		return(df_return)#
-}
-bbb <- lapply(lst_combinations, function(x) fn_create_combination_aggregates(df_base_aggregates, x, lst_sum_clause))
-lst_sum_clause <- setNames(lst_aggregations, agg_names)
-bbb <- lapply(lst_combinations, function(x) fn_create_combination_aggregates(df_base_aggregates, x, lst_sum_clause))
-bbb <- lapply(lst_combinations, function(x) fn_create_comb_aggregates(df_base_aggregates, x, lst_sum_clause))
-fn_create_comb_aggregates <- #
-	function(a_df_base_aggregates, a_vct_columns, a_sum_clause) {#
-		df_return <- a_df_base_aggregates %>% #
-		# group_by various column combinations#
-		group_by_(.dots = a_vct_columns) %>% #
-		# create totals for 4 measure columns#
-		summarise_(.dots = a_sum_clause) %>% #
-		# fill is missing columns with the value "All"#
-		fn_create_df_with_all(vct_dim_names, vct_col_sort)#
-		return(df_return)#
-}
-bbb <- lapply(lst_combinations, function(x) fn_create_comb_aggregates(df_base_aggregates, x, lst_sum_clause))
-source('functions/fn_create_comb_aggregates.R')
-list = ls()#
-library(lubridate)#
-library(dplyr)#
-#
-options(stringsAsFactors = FALSE)#
-setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
-source('functions/fn_create_date.R')#
-source('functions/fn_create_whole_years.R')#
-source('functions/fn_calc_lagged_date.R')#
-source('functions/fn_calculate_component_quarters.R')#
-source('functions/fn_calc_los.R')#
-source('functions/fn_create_year_end.R')#
-source('functions/fn_create_column_combinations.R')#
-source('functions/fn_create_df_with_all.R')#
-source('functions/fn_create_comb_aggregates.R')#
-# load some data#
-df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
-df_accomodation <- read.csv("data/vw_DTSVisitAccommodation.csv", header = TRUE)#
-# create a quarter end date from quarter number and year#
-df_trips$QEDate <- fn_create_date(df_trips$TripQtr, df_trips$TripYear)#
-#
-# create a data frame of unique whole years (there are 53)#
-df_wy <- df_trips %>% #
-		fn_create_whole_years() %>% #
-		# creates four columns of year ends#
-		fn_create_year_end()#
-vct_wy <-  unique(c(df_wy$YEMar, df_wy$YEJun, df_wy$YESep, df_wy$YEDec))#
-# a specific year end consists of 4 component quarters. These are time contiguous  (there are 56)#
-#vct_component_quarters <- fn_calculate_component_quarters(df_whole_years$whole_year)#
-# delete uneeded columns & include only "Overnight trip" as.. these have associated Accomodation values#
-df_trips <- df_trips %>% select(c(SurveyResponseID,TripIDNumber,TripType, QEDate,TripYear,#
-		TripQtr, DestinationRTO, RespondentWeight, SmoothedTripWeight)) %>%#
-		filter(TripType == "Overnight Trip")#
-# add 4 extra columns. These will be used in group by calculations#
-df_trips <- fn_create_year_end(df_trips)#
-df_YE_Mar <- df_trips %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
-df_YE_Jun <- df_trips %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
-df_YE_Sep <- df_trips %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
-df_YE_Dec <- df_trips %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
-df_YE_all <- df_YE_Mar %>% bind_rows(df_YE_Jun) %>% #
-	bind_rows(df_YE_Sep) %>% bind_rows(df_YE_Dec) %>% group_by(YE) %>% #
-	summarise(count = n()) %>% filter(count == 4) %>% select(YE)#
-# include only the necessary stuff for df_accomodation#
-df_accomodation <- df_accomodation %>% select(TripID, AccommodationType, NoNights)#
-#
-# calculate length of stay group#
-df_accomodation$LOS_Group <- fn_calc_los(df_accomodation$NoNights)#
-# combine the two data frames into one, do some renaming, grouping and aggregating#
-df_combined <- df_trips %>% #
-	inner_join(df_accomodation, by = c("TripIDNumber"  = "TripID")) %>% #
-	mutate(TotalNights = NoNights * SmoothedTripWeight, TotalRespondents = 1) %>%#
-	rename(TotalVisitors = RespondentWeight, TotalTrips = SmoothedTripWeight) %>%#
-	select(YEDec, YESep, YEJun, YEMar, QEDate, LOS_Group, DestinationRTO, #
-		AccommodationType, TotalVisitors, TotalTrips, TotalNights, TotalRespondents) %>%#
-	group_by(YEDec, YESep, YEJun, YEMar, QEDate, LOS_Group, DestinationRTO, AccommodationType ) %>%#
-	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
-		TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents))#
-# create a vector of 4 different columns stacked on top of each other#
-YE <- c(df_combined$YEDec, df_combined$YESep, df_combined$YEJun, df_combined$YEMar)#
-#
-# duplicate the same data frame 4 time and stack on top of each other (158188 rows)#
-df_four_quarters <- rbind(df_combined, df_combined, df_combined, df_combined)#
-# combine the previously created vector with the stacked data frames #
-# unfiltered is 93734 rows, filtered is 86511 rows#
-df_base_aggregates <- cbind(YE, df_four_quarters) %>%#
-	select(-c(YEDec, YESep, YEJun, YEMar, QEDate))  %>%#
-	group_by(YE, LOS_Group, DestinationRTO, AccommodationType) %>%#
-	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
-	TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents)) %>%  #
-	filter(YE %in% df_YE_all$YE)#
-==================================================================#
-# get the names of the dimensions#
-vct_dim_names <- names(df_base_aggregates)[1:4]#
-#
-lst_aggregations <- list("sum(TotalVisitors)", "sum(TotalTrips)", #
-	"sum(TotalNights)", "sum(TotalRespondents)")#
-#
-agg_names <- c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents")#
-#
-vct_col_sort <- c(vct_dim_names, agg_names)#
-lst_combinations <- fn_create_column_combinations(vct_dim_names)#
-#
-lst_sum_clause <- setNames(lst_aggregations, agg_names)
-df_base_aggregates <- cbind(YE, df_four_quarters) %>%#
-	select(-c(YEDec, YESep, YEJun, YEMar, QEDate))  %>%#
-	group_by(YE, LOS_Group, DestinationRTO, AccommodationType) %>%#
-	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
-	TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents)) %>%  #
-	filter(YE %in% df_YE_all$YE)
 vct_dim_names <- names(df_base_aggregates)[1:4]
-lst_aggregations <- list("sum(TotalVisitors)", "sum(TotalTrips)", #
-	"sum(TotalNights)", "sum(TotalRespondents)")
-agg_names <- c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents")
-vct_col_sort <- c(vct_dim_names, agg_names)
-lst_combinations <- fn_create_column_combinations(vct_dim_names)
-lst_sum_clause <- setNames(lst_aggregations, agg_names)
-bbb <- lapply(lst_combinations, function(x) #
-	fn_create_comb_aggregates(df_base_aggregates, x, lst_sum_clause))
-bbb[[2]]
-bbb[[1]]
-list = ls()#
-library(lubridate)#
+df_consolidated %>% select_(.dots = vct_dim_names)
+df_consolidated %>% select_(.dots = vct_dim_names)
+xcxc <- sapply(df_consolidated[, agg_names], function(x) fn_convert_to_text(x)) %>%#
+ 			# convert sapply's matrix to a a data frame#
+ 			as.data.frame() %>%#
+ 			bind_cols(df_consolidated[, vct_dim_names, ], .)
+head(xcxc)
+str(xcxc)
+nrow(xcxc)
+nrow(df_consolidated)
+# clear everything#
+rm(list = ls())#
+#
+# load some libaries #
+#library(lubridate)#
 library(dplyr)#
+library(stringr)#
 #
 options(stringsAsFactors = FALSE)#
 setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
-source('functions/fn_create_date.R')#
-source('functions/fn_create_whole_years.R')#
-source('functions/fn_calc_lagged_date.R')#
-source('functions/fn_calculate_component_quarters.R')#
+#
+# calculates "length of stay"#
 source('functions/fn_calc_los.R')#
-source('functions/fn_create_year_end.R')#
+# creates a data.frame of column combinations for use in a group_by#
 source('functions/fn_create_column_combinations.R')#
-source('functions/fn_create_df_with_all.R')#
+# uses column combinations to create various group_by#
 source('functions/fn_create_comb_aggregates.R')#
-# load some data#
+# appends columns to a data.frame such that resultant df is always 8 columns wide#
+source('functions/fn_create_df_with_all.R')#
+# appends a data.frame with four columns#
+source('functions/fn_create_year_end.R')#
+# converts floating point number to text#
+source('functions/fn_convert_to_text.R')#
+# PREAMBLE (data relationships)#
+# relationship between df_trips & df_accomodation: a person makes a trip and...#
+# stays in accomodation. When a person makes a day trip there is no need for..#
+# accomodation. Therefore only "Overnight trips" are included #
+# A single trip can have multiple accomodation values as a person..#
+# can stay in different hotels in the same or different locations#
+# the data is quarterly data#
+#
+# PLAN OF ATTACK#
+# 1) load two CSV files #
+# 2) process the two CVS files#
+# 3) create a data frame of complete years (where the number of quarters = 4)#
+# 4) combine the two data frames and aggregate by: #
+#		a) year end (4 quarterly year ends) and#
+#		b) four dimension variables#
+# 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
+# 6) create various aggregate combinations#
+# (1) LOAD data#
 df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
 df_accomodation <- read.csv("data/vw_DTSVisitAccommodation.csv", header = TRUE)#
-# create a quarter end date from quarter number and year#
-df_trips$QEDate <- fn_create_date(df_trips$TripQtr, df_trips$TripYear)#
-#
-# create a data frame of unique whole years (there are 53)#
-df_wy <- df_trips %>% #
-		fn_create_whole_years() %>% #
-		# creates four columns of year ends#
-		fn_create_year_end()#
-vct_wy <-  unique(c(df_wy$YEMar, df_wy$YEJun, df_wy$YESep, df_wy$YEDec))#
-# a specific year end consists of 4 component quarters. These are time contiguous  (there are 56)#
-#vct_component_quarters <- fn_calculate_component_quarters(df_whole_years$whole_year)#
-# delete uneeded columns & include only "Overnight trip" as.. these have associated Accomodation values#
-df_trips <- df_trips %>% select(c(SurveyResponseID,TripIDNumber,TripType, QEDate,TripYear,#
-		TripQtr, DestinationRTO, RespondentWeight, SmoothedTripWeight)) %>%#
-		filter(TripType == "Overnight Trip")#
-# add 4 extra columns. These will be used in group by calculations#
-df_trips <- fn_create_year_end(df_trips)#
-df_YE_Mar <- df_trips %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
-df_YE_Jun <- df_trips %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
-df_YE_Sep <- df_trips %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
-df_YE_Dec <- df_trips %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
-df_YE_all <- df_YE_Mar %>% bind_rows(df_YE_Jun) %>% #
-	bind_rows(df_YE_Sep) %>% bind_rows(df_YE_Dec) %>% group_by(YE) %>% #
-	summarise(count = n()) %>% filter(count == 4) %>% select(YE)#
-# include only the necessary stuff for df_accomodation#
+# (2.1) PROCESS df_accomodation#
+# for df_accomodation: select relevent columns; create a new column#
 df_accomodation <- df_accomodation %>% select(TripID, AccommodationType, NoNights)#
-#
-# calculate length of stay group#
+# convert any NAs to zeros#
+df_accomodation[is.na(df_accomodation$NoNights), "NoNights"] <- 0#
 df_accomodation$LOS_Group <- fn_calc_los(df_accomodation$NoNights)#
+# (2.2) PROCESS df_trips#
+# delete uneeded columns & include only "Overnight trips" (nrow = 90693)#
+df_trips_overnight <- df_trips %>% filter(TripType == "Overnight Trip") %>% #
+		select(c(TripIDNumber,TripType, TripYear,#
+		TripQtr, DestinationRTO, RespondentWeight, SmoothedTripWeight)) #
+df_trips_overnight[is.na(df_trips_overnight$RespondentWeight), "RespondentWeight"] <- 0#
+df_trips_overnight[is.na(df_trips_overnight$SmoothedTripWeight), "SmoothedTripWeight"] <- 0#
+# clean up#
+rm(df_trips, fn_calc_los)#
+# (3) CREATE a data frame of complete years. #
+# add 4 extra columns. These will be used in group by calculations (nrow = 90693)#
+df_trips_overnight <- fn_create_year_end(df_trips_overnight)#
+#
+# (3.1) create four data frames with unique year ending values#
+df_YE_Mar <- df_trips_overnight  %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
+df_YE_Jun <- df_trips_overnight  %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
+df_YE_Sep <- df_trips_overnight  %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
+df_YE_Dec <- df_trips_overnight  %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
+#
+# (3.2) stack the four data frames; include whole year values; select a single column#
+df_YE_all <- bind_rows(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec) %>%#
+			group_by(YE) %>% summarise(count = n()) %>% #
+			filter(count == 4) %>% select(YE)#
+# clean up			#
+rm(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec)#
+# (4) COMBINE two data frames into one#
 # combine the two data frames into one, do some renaming, grouping and aggregating#
-df_combined <- df_trips %>% #
+df_combined <- df_trips_overnight %>% #
 	inner_join(df_accomodation, by = c("TripIDNumber"  = "TripID")) %>% #
 	mutate(TotalNights = NoNights * SmoothedTripWeight, TotalRespondents = 1) %>%#
 	rename(TotalVisitors = RespondentWeight, TotalTrips = SmoothedTripWeight) %>%#
-	select(YEDec, YESep, YEJun, YEMar, QEDate, LOS_Group, DestinationRTO, #
+	select(YEDec, YESep, YEJun, YEMar,  LOS_Group, DestinationRTO, #
 		AccommodationType, TotalVisitors, TotalTrips, TotalNights, TotalRespondents) %>%#
-	group_by(YEDec, YESep, YEJun, YEMar, QEDate, LOS_Group, DestinationRTO, AccommodationType ) %>%#
+	group_by(YEDec, YESep, YEJun, YEMar, LOS_Group, DestinationRTO, AccommodationType ) %>%#
 	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
 		TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents))#
+# clean up#
+rm(df_accomodation, df_trips_overnight)#
+# (5) CREATE Year Ending aggregates and filter to include full ears#
 # create a vector of 4 different columns stacked on top of each other#
 YE <- c(df_combined$YEDec, df_combined$YESep, df_combined$YEJun, df_combined$YEMar)#
 #
 # duplicate the same data frame 4 time and stack on top of each other (158188 rows)#
 df_four_quarters <- rbind(df_combined, df_combined, df_combined, df_combined)#
+#
 # combine the previously created vector with the stacked data frames #
 # unfiltered is 93734 rows, filtered is 86511 rows#
 df_base_aggregates <- cbind(YE, df_four_quarters) %>%#
-	select(-c(YEDec, YESep, YEJun, YEMar, QEDate))  %>%#
+	select(-c(YEDec, YESep, YEJun, YEMar))  %>%#
 	group_by(YE, LOS_Group, DestinationRTO, AccommodationType) %>%#
-	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
-	TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents)) %>%  #
+	summarise(Total_Visitors = sum(TotalVisitors), Total_Trips = sum(TotalTrips), #
+	Total_Nights = sum(TotalNights), Total_Respondents = sum(TotalRespondents)) %>%  #
 	filter(YE %in% df_YE_all$YE)#
-==================================================================#
-# get the names of the dimensions#
+#
+# Following are reconciliations checks. To be commented in / out#
+# options(digits = 22)#
+# df_base_aggregates %>% ungroup() %>% #
+#	summarise (Total_Visitors =  sum(Total_Visitors), Total_Trips = sum(Total_Trips), #
+#	Total_Nights = sum(Total_Nights), Total_Respondents = sum(Total_Respondents))#
+# clean up#
+rm(df_combined, df_four_quarters, df_YE_all, YE)#
+# (6) CREATE various aggregate combinations#
+# PREAMBLE for (6)#
+# There are four dimenions columns. The total number of group_by combinations of these are:#
+# 2^4 = 16.  1 of these has been previously created (see 'df_base_aggregates' )...#
+# the remaining 15 combinations are created below.  Of these 15 combinations, 14 are created#
+# programmatically (see 6.5). The remaining combination is created as a single line of code (see 6.6)#
+#
+# (6.1) get the dimenions names#
 vct_dim_names <- names(df_base_aggregates)[1:4]#
-lst_aggregations <- list("sum(TotalVisitors)", "sum(TotalTrips)", #
-	"sum(TotalNights)", "sum(TotalRespondents)")#
+#
+# (6.2) create a "summarise" clause (for multiple use later)#
+lst_aggregations <- list("sum(Total_Visitors)", "sum(Total_Trips)", #
+	"sum(Total_Nights)", "sum(Total_Respondents)")#
 #
 agg_names <- c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents")#
-vct_col_sort <- c(vct_dim_names, agg_names)#
-lst_combinations <- fn_create_column_combinations(vct_dim_names)#
 #
 lst_sum_clause <- setNames(lst_aggregations, agg_names)#
 #
-# send each element of 'lst_combinations' to 'fn_create_comb_aggregates()'#
+# (6.3) sort order of the columns#
+vct_col_sort <- c(vct_dim_names, agg_names)#
+#
+# (6.4) There are four columns resulting in 2^4 = 16 combinations...#
+# we now create 14 of these combinations#
+lst_combinations <- fn_create_column_combinations(vct_dim_names)#
+#
+# (6.5) Create a list of data frames Each list element is a data frame#
+# based on a column combination created in 6.4#
 lst_aggregations <- lapply(lst_combinations, function(x) #
-	fn_create_comb_aggregates(df_base_aggregates, x, lst_sum_clause))
-list = ls()#
-library(lubridate)#
+	fn_create_comb_aggregates(df_base_aggregates, x, lst_sum_clause))#
+#
+# (6.5.1) combine the list of data frames into a single data frame#
+df.aggregations <- do.call(bind_rows, lst_aggregations)#
+#
+# (6.6) grand totals#
+df_totals <- df_base_aggregates %>% ungroup() %>% #
+				summarise_(.dots = lst_sum_clause) %>% #
+				fn_create_df_with_all(vct_dim_names, vct_col_sort)#
+# clean up#
+rm(fn_create_column_combinations, fn_create_comb_aggregates, fn_create_df_with_all)#
+rm(fn_create_year_end, lst_aggregations, lst_sum_clause, vct_col_sort)#
+#
+# (7) combine all aggregates into a single data frame#
+# total rows = 86511 + 71114 + 1 = 157626#
+df_consolidated <- bind_rows(df_base_aggregates, df.aggregations, df_totals)#
+# (7.1) convert numeric columns to text with 0 decimal places#
+df__fin <- sapply(df_consolidated[, agg_names], function(x) fn_convert_to_text(x)) %>%#
+ 			# convert sapply's matrix to a data frame#
+ 			as.data.frame() %>%#
+ 			# club the columns together#
+ 			bind_cols(df_consolidated[, vct_dim_names, ], .)
+# (7.1) convert numeric columns to text with 0 decimal places#
+df_fin <- sapply(df_consolidated[, agg_names], function(x) fn_convert_to_text(x)) %>%#
+ 			# convert sapply's matrix to a data frame#
+ 			as.data.frame() %>%#
+ 			# club the columns together#
+ 			bind_cols(df_consolidated[, vct_dim_names, ], .)
+head(df_fin)
+ls()
+rm(df_base_aggregates, df_totals, df.aggregations, lst_combinations)
+ls()
+rm(agg_names, fn_convert_to_text, vct_dim_names)
+head(df__fin)
+dir()
+dir(/data)
+dir(data/)
+dir(/data/)
+dir(ata)
+dir(data)
+dir("data/")
+dir("output/")
+dir("outputs/")
+df_lu_a <- read.csv("outputs/DimenLookupAccommodationTypeAccommodation.csv", header = TRUE)
+head(df_lu_a)
+str(df_lu_a)
+df_lu_a <- read.csv("outputs/DimenLookupDestinationRTOAccommodation.csv", header = TRUE)
+head(df_lu_a)
+df_lu_LOS <- read.csv("outputs/DimenLookupLOS_groupAccommodation.csv", header = TRUE)
+head(df_lu_LOS)
+str(df_lu_LOS)
+head(df_fin)
+df_fin %>% inner_join(df_lu_LOS, by = c("DestinationRTO"  = "Description"))
+aa <- df_fin %>% inner_join(df_lu_LOS, by = c("DestinationRTO"  = "Description"))
+head(aa)
+nrow(aa)
+aa <- df_fin %>% anti_join(df_lu_LOS, by = c("DestinationRTO"  = "Description"))
+head(aa)
+unique(df_lu_LOS$Description)
+unique(df_fin$LOS_Group)
+lu <- unique(df_lu_LOS$Description)
+fin <- unique(df_fin$LOS_Group)
+lu
+fin
+setdiff(lu, fin)
+setdiff(fin,lu)
+intersection(fin,lu)
+intersect(fin,lu)
+aa <- df_fin %>% inner_join(df_lu_LOS, by = c("DestinationRTO"  = "Description"))
+nrow(aa)
+nrow(df__fin)
+nrow(df_fin)
+bb <- df_lu_LOS %>% inner_join(df_fin, by = c("Description"  = "DestinationRTO"))
+head(bb)
+nrow(bb)
+nrow(aa)
+head(anti)
+anti <- df_fin %>% anti_join(df_lu_LOS, by = c("DestinationRTO"  = "Description"))
+head(anti)
+unique(anti$LOS_Group)
+str(df_fin)
+str(df_lu_LOS)
+df_LOS <- df__fin$LOS_Group
+head(df_LOS)
+df_LOS <- as.data.frame(df_fin$LOS_Group)
+head(df_LOS)
+df_LOS <- data.frame(LOS  = df_fin$LOS_Group)
+head(df_LOS)
+xxx <- inner_join(df_LOS, df_lu_LOS, by = c("LOS" = "Description"))
+nrow(xxx)
+xxx <- inner_join(df_fin, df_lu_LOS, by = c("LOS" = "Description"))
+xxx <- inner_join(df_fin, df_lu_LOS, by = c("LOS_Group" = "Description"))
+nrow(xxx)
+head(xxx)
+xxx <- inner_join(df_fin, df_lu_LOS, by = c("LOS_Group" = "Description"))
+nrow(xxx)
+zzz <- anti_join(df_fin, df_lu_LOS, by = c("LOS_Group" = "Description"))
+head(zzz)
+nrow(zzz)
+xxx <- inner_join(df_fin, df_lu_LOS, by = c("LOS_Group" = "Description"))
+xx1 <- df_fin %>% inner_join(df_lu_LOS, by = c("LOS_Group" = "Description"))
+nrow(xx1)
+xx1 <- df_fin %>% inner_join(df_lu_LOS, by = c("LOS_Group" = "Description")) %>% #
+		mutate(LOS_Group = Code) %>% #
+		select(-c("Code", "SortOrder"))
+xx1 <- df_fin %>% inner_join(df_lu_LOS, by = c("LOS_Group" = "Description")) %>% #
+		mutate(LOS_Group = Code) %>% #
+		select(-c(Code, SortOrder))
+head(xx1)
+xx2 <- df_fin %>% inner_join(df_lu_dest_rto, by = c("DestinationRTO" = "Description")) %>% #
+		mutate(DestinationRTO = Code) %>% #
+		select(-c(Code, SortOrder))
+df_lu_dest_rto <- read.csv("outputs/DimenLookupDestinationRTOAccommodation.csv", header = TRUE)
+xx2 <- df_fin %>% inner_join(df_lu_dest_rto, by = c("DestinationRTO" = "Description")) %>% #
+		mutate(DestinationRTO = Code) %>% #
+		select(-c(Code, SortOrder))
+nrow(xx2)
+xx2 <- df_fin %>% anti_join(df_lu_dest_rto, by = c("DestinationRTO" = "Description"))
+xx2
+nrow(xx2)
+xx2$AccommodationType
+xx2$DestinationRTO
+# clear everything#
+rm(list = ls())#
+#
+# load some libaries #
+#library(lubridate)#
 library(dplyr)#
+library(stringr)#
 #
 options(stringsAsFactors = FALSE)#
 setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
-source('functions/fn_create_date.R')#
-source('functions/fn_create_whole_years.R')#
-source('functions/fn_calc_lagged_date.R')#
-source('functions/fn_calculate_component_quarters.R')#
+#
+# calculates "length of stay"#
 source('functions/fn_calc_los.R')#
-source('functions/fn_create_year_end.R')#
+# creates a data.frame of column combinations for use in a group_by#
 source('functions/fn_create_column_combinations.R')#
-source('functions/fn_create_df_with_all.R')#
+# uses column combinations to create various group_by#
 source('functions/fn_create_comb_aggregates.R')#
-# load some data#
+# appends columns to a data.frame such that resultant df is always 8 columns wide#
+source('functions/fn_create_df_with_all.R')#
+# appends a data.frame with four columns#
+source('functions/fn_create_year_end.R')#
+# converts floating point number to text#
+source('functions/fn_convert_to_text.R')#
+# PREAMBLE (data relationships)#
+# relationship between df_trips & df_accomodation: a person makes a trip and...#
+# stays in accomodation. When a person makes a day trip there is no need for..#
+# accomodation. Therefore only "Overnight trips" are included #
+# A single trip can have multiple accomodation values as a person..#
+# can stay in different hotels in the same or different locations#
+# the data is quarterly data#
+#
+# PLAN OF ATTACK#
+# 1) load two CSV files #
+# 2) process the two CVS files#
+# 3) create a data frame of complete years (where the number of quarters = 4)#
+# 4) combine the two data frames and aggregate by: #
+#		a) year end (4 quarterly year ends) and#
+#		b) four dimension variables#
+# 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
+# 6) create various aggregate combinations#
+# (1) LOAD data#
 df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
 df_accomodation <- read.csv("data/vw_DTSVisitAccommodation.csv", header = TRUE)#
-# create a quarter end date from quarter number and year#
-df_trips$QEDate <- fn_create_date(df_trips$TripQtr, df_trips$TripYear)#
-#
-# create a data frame of unique whole years (there are 53)#
-df_wy <- df_trips %>% #
-		fn_create_whole_years() %>% #
-		# creates four columns of year ends#
-		fn_create_year_end()#
-vct_wy <-  unique(c(df_wy$YEMar, df_wy$YEJun, df_wy$YESep, df_wy$YEDec))#
-# a specific year end consists of 4 component quarters. These are time contiguous  (there are 56)#
-#vct_component_quarters <- fn_calculate_component_quarters(df_whole_years$whole_year)#
-# delete uneeded columns & include only "Overnight trip" as.. these have associated Accomodation values#
-df_trips <- df_trips %>% select(c(SurveyResponseID,TripIDNumber,TripType, QEDate,TripYear,#
-		TripQtr, DestinationRTO, RespondentWeight, SmoothedTripWeight)) %>%#
-		filter(TripType == "Overnight Trip")#
-# add 4 extra columns. These will be used in group by calculations#
-df_trips <- fn_create_year_end(df_trips)#
-df_YE_Mar <- df_trips %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
-df_YE_Jun <- df_trips %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
-df_YE_Sep <- df_trips %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
-df_YE_Dec <- df_trips %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
-df_YE_all <- df_YE_Mar %>% bind_rows(df_YE_Jun) %>% #
-	bind_rows(df_YE_Sep) %>% bind_rows(df_YE_Dec) %>% group_by(YE) %>% #
-	summarise(count = n()) %>% filter(count == 4) %>% select(YE)#
-# include only the necessary stuff for df_accomodation#
+# (2.1) PROCESS df_accomodation#
+# for df_accomodation: select relevent columns; create a new column#
 df_accomodation <- df_accomodation %>% select(TripID, AccommodationType, NoNights)#
-#
-# calculate length of stay group#
+# convert any NAs to zeros#
+df_accomodation[is.na(df_accomodation$NoNights), "NoNights"] <- 0#
 df_accomodation$LOS_Group <- fn_calc_los(df_accomodation$NoNights)#
+# (2.2) PROCESS df_trips#
+# delete uneeded columns & include only "Overnight trips" (nrow = 90693)#
+df_trips_overnight <- df_trips %>% filter(TripType == "Overnight Trip") %>% #
+		select(c(TripIDNumber,TripType, TripYear,#
+		TripQtr, DestinationRTO, RespondentWeight, SmoothedTripWeight)) #
+df_trips_overnight[is.na(df_trips_overnight$RespondentWeight), "RespondentWeight"] <- 0#
+df_trips_overnight[is.na(df_trips_overnight$SmoothedTripWeight), "SmoothedTripWeight"] <- 0#
+# clean up#
+rm(df_trips, fn_calc_los)
+unique(df_trips_overnight$DestinationRTO)
+df_trips_overnight[df_trips_overnight$DestinationRTO == "Other   " "DestinationRTO"] <- "Other"
+df_trips_overnight[df_trips_overnight$DestinationRTO == "Other   ", "DestinationRTO"] <- "Other"
+# clear everything#
+rm(list = ls())#
+#
+# load some libaries #
+#library(lubridate)#
+library(dplyr)#
+library(stringr)#
+#
+options(stringsAsFactors = FALSE)#
+setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
+#
+# calculates "length of stay"#
+source('functions/fn_calc_los.R')#
+# creates a data.frame of column combinations for use in a group_by#
+source('functions/fn_create_column_combinations.R')#
+# uses column combinations to create various group_by#
+source('functions/fn_create_comb_aggregates.R')#
+# appends columns to a data.frame such that resultant df is always 8 columns wide#
+source('functions/fn_create_df_with_all.R')#
+# appends a data.frame with four columns#
+source('functions/fn_create_year_end.R')#
+# converts floating point number to text#
+source('functions/fn_convert_to_text.R')#
+# PREAMBLE (data relationships)#
+# relationship between df_trips & df_accomodation: a person makes a trip and...#
+# stays in accomodation. When a person makes a day trip there is no need for..#
+# accomodation. Therefore only "Overnight trips" are included #
+# A single trip can have multiple accomodation values as a person..#
+# can stay in different hotels in the same or different locations#
+# the data is quarterly data#
+#
+# PLAN OF ATTACK#
+# 1) load two CSV files #
+# 2) process the two CVS files#
+# 3) create a data frame of complete years (where the number of quarters = 4)#
+# 4) combine the two data frames and aggregate by: #
+#		a) year end (4 quarterly year ends) and#
+#		b) four dimension variables#
+# 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
+# 6) create various aggregate combinations#
+# (1) LOAD data#
+df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
+df_accomodation <- read.csv("data/vw_DTSVisitAccommodation.csv", header = TRUE)#
+# (2.1) PROCESS df_accomodation#
+# for df_accomodation: select relevent columns; create a new column#
+df_accomodation <- df_accomodation %>% select(TripID, AccommodationType, NoNights)#
+# convert any NAs to zeros#
+df_accomodation[is.na(df_accomodation$NoNights), "NoNights"] <- 0#
+df_accomodation$LOS_Group <- fn_calc_los(df_accomodation$NoNights)#
+# (2.2) PROCESS df_trips#
+# delete uneeded columns & include only "Overnight trips" (nrow = 90693)#
+df_trips_overnight <- df_trips %>% filter(TripType == "Overnight Trip") %>% #
+		select(c(TripIDNumber,TripType, TripYear,#
+		TripQtr, DestinationRTO, RespondentWeight, SmoothedTripWeight)) #
+#
+# clean up some columns#
+df_trips_overnight[is.na(df_trips_overnight$RespondentWeight), "RespondentWeight"] <- 0#
+df_trips_overnight[is.na(df_trips_overnight$SmoothedTripWeight), "SmoothedTripWeight"] <- 0#
+df_trips_overnight[df_trips_overnight$DestinationRTO == "Other   ", "DestinationRTO"] <- "Other"#
+# clean up#
+rm(df_trips, fn_calc_los)#
+# (3) CREATE a data frame of complete years. #
+# add 4 extra columns. These will be used in group by calculations (nrow = 90693)#
+df_trips_overnight <- fn_create_year_end(df_trips_overnight)#
+#
+# (3.1) create four data frames with unique year ending values#
+df_YE_Mar <- df_trips_overnight  %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
+df_YE_Jun <- df_trips_overnight  %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
+df_YE_Sep <- df_trips_overnight  %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
+df_YE_Dec <- df_trips_overnight  %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
+#
+# (3.2) stack the four data frames; include whole year values; select a single column#
+df_YE_all <- bind_rows(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec) %>%#
+			group_by(YE) %>% summarise(count = n()) %>% #
+			filter(count == 4) %>% select(YE)#
+# clean up			#
+rm(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec)#
+# (4) COMBINE two data frames into one#
 # combine the two data frames into one, do some renaming, grouping and aggregating#
-df_combined <- df_trips %>% #
+df_combined <- df_trips_overnight %>% #
 	inner_join(df_accomodation, by = c("TripIDNumber"  = "TripID")) %>% #
 	mutate(TotalNights = NoNights * SmoothedTripWeight, TotalRespondents = 1) %>%#
 	rename(TotalVisitors = RespondentWeight, TotalTrips = SmoothedTripWeight) %>%#
-	select(YEDec, YESep, YEJun, YEMar, QEDate, LOS_Group, DestinationRTO, #
+	select(YEDec, YESep, YEJun, YEMar,  LOS_Group, DestinationRTO, #
 		AccommodationType, TotalVisitors, TotalTrips, TotalNights, TotalRespondents) %>%#
-	group_by(YEDec, YESep, YEJun, YEMar, QEDate, LOS_Group, DestinationRTO, AccommodationType ) %>%#
+	group_by(YEDec, YESep, YEJun, YEMar, LOS_Group, DestinationRTO, AccommodationType ) %>%#
 	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
 		TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents))#
-#
+# clean up#
+rm(df_accomodation, df_trips_overnight)#
+# (5) CREATE Year Ending aggregates and filter to include full ears#
 # create a vector of 4 different columns stacked on top of each other#
 YE <- c(df_combined$YEDec, df_combined$YESep, df_combined$YEJun, df_combined$YEMar)#
 #
 # duplicate the same data frame 4 time and stack on top of each other (158188 rows)#
 df_four_quarters <- rbind(df_combined, df_combined, df_combined, df_combined)#
+#
 # combine the previously created vector with the stacked data frames #
 # unfiltered is 93734 rows, filtered is 86511 rows#
 df_base_aggregates <- cbind(YE, df_four_quarters) %>%#
-	select(-c(YEDec, YESep, YEJun, YEMar, QEDate))  %>%#
+	select(-c(YEDec, YESep, YEJun, YEMar))  %>%#
 	group_by(YE, LOS_Group, DestinationRTO, AccommodationType) %>%#
-	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
-	TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents)) %>%  #
+	summarise(Total_Visitors = sum(TotalVisitors), Total_Trips = sum(TotalTrips), #
+	Total_Nights = sum(TotalNights), Total_Respondents = sum(TotalRespondents)) %>%  #
 	filter(YE %in% df_YE_all$YE)#
-==================================================================#
-# get the names of the dimensions#
+#
+# Following are reconciliations checks. To be commented in / out#
+# options(digits = 22)#
+# df_base_aggregates %>% ungroup() %>% #
+#	summarise (Total_Visitors =  sum(Total_Visitors), Total_Trips = sum(Total_Trips), #
+#	Total_Nights = sum(Total_Nights), Total_Respondents = sum(Total_Respondents))#
+# clean up#
+rm(df_combined, df_four_quarters, df_YE_all, YE)#
+# (6) CREATE various aggregate combinations#
+# PREAMBLE for  (6)#
+# There are four dimenions columns. The total number of group_by combinations of these are:#
+# 2^4 = 16.  1 of these has been previously created (see 'df_base_aggregates' )...#
+# the remaining 15 combinations are created below.  Of these 15 combinations, 14 are created#
+# programmatically (see 6.5). The remaining combination is created as a single line of code (see 6.6)#
+#
+# (6.1) get the dimenions names#
 vct_dim_names <- names(df_base_aggregates)[1:4]#
-lst_aggregations <- list("sum(TotalVisitors)", "sum(TotalTrips)", #
-	"sum(TotalNights)", "sum(TotalRespondents)")#
+#
+# (6.2) create a "summarise" clause (for multiple use later)#
+lst_aggregations <- list("sum(Total_Visitors)", "sum(Total_Trips)", #
+	"sum(Total_Nights)", "sum(Total_Respondents)")#
 #
 agg_names <- c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents")#
-vct_col_sort <- c(vct_dim_names, agg_names)#
-lst_combinations <- fn_create_column_combinations(vct_dim_names)#
 #
 lst_sum_clause <- setNames(lst_aggregations, agg_names)#
 #
-# send each element of 'lst_combinations' to 'fn_create_comb_aggregates()'#
+# (6.3) sort order of the columns#
+vct_col_sort <- c(vct_dim_names, agg_names)#
+#
+# (6.4) There are four columns resulting in 2^4 = 16 combinations...#
+# we now create 14 of these combinations#
+lst_combinations <- fn_create_column_combinations(vct_dim_names)#
+#
+# (6.5) Create a list of data frames Each list element is a data frame#
+# based on a column combination created in 6.4#
 lst_aggregations <- lapply(lst_combinations, function(x) #
-	fn_create_comb_aggregates(df_base_aggregates, x, lst_sum_clause))
-list = ls()#
-library(lubridate)#
+	fn_create_comb_aggregates(df_base_aggregates, x, lst_sum_clause))#
+#
+# (6.5.1) combine the list of data frames into a single data frame#
+df.aggregations <- do.call(bind_rows, lst_aggregations)#
+#
+# (6.6) grand totals#
+df_totals <- df_base_aggregates %>% ungroup() %>% #
+				summarise_(.dots = lst_sum_clause) %>% #
+				fn_create_df_with_all(vct_dim_names, vct_col_sort)#
+# clean up#
+rm(fn_create_column_combinations, fn_create_comb_aggregates, fn_create_df_with_all)#
+rm(fn_create_year_end, lst_aggregations, lst_sum_clause, vct_col_sort)#
+#
+# (7) combine all aggregates into a single data frame#
+# total rows = 86511 + 71114 + 1 = 157626#
+df_consolidated <- bind_rows(df_base_aggregates, df.aggregations, df_totals)#
+# (7.1) convert numeric columns to text with 0 decimal places#
+df_fin <- sapply(df_consolidated[, agg_names], function(x) fn_convert_to_text(x)) %>%#
+ 			# convert sapply's matrix to a data frame#
+ 			as.data.frame() %>%#
+ 			# club the original columns together with the new text columns#
+ 			bind_cols(df_consolidated[, vct_dim_names, ], .)#
+#
+#clean up#
+rm(df_base_aggregates, df_totals, df.aggregations, lst_combinations)#
+rm(agg_names, fn_convert_to_text, vct_dim_names)#
+df_lu_acccom_type <- read.csv("outputs/DimenLookupAccommodationTypeAccommodation.csv", header = TRUE)#
+df_lu_dest_rto <- read.csv("outputs/DimenLookupDestinationRTOAccommodation.csv", header = TRUE)#
+df_lu_LOS <- read.csv("outputs/DimenLookupLOS_groupAccommodation.csv", header = TRUE)
+xx1 <- df_fin %>% inner_join(df_lu_LOS, by = c("LOS_Group" = "Description")) %>% #
+		mutate(LOS_Group = Code) %>% #
+		select(-c(Code, SortOrder))
+nrow(xx1)
+xx2 <- df_fin %>% inner_join(df_lu_dest_rto, by = c("DestinationRTO" = "Description"))
+nrow(xx2)
+head(xx2)
+xx2 <- df_fin %>% inner_join(df_lu_dest_rto, by = c("DestinationRTO" = "Description")) %>% #
+		mutate(DestinationRTO = Code) %>% #
+		select(-c(Code, SortOrder))
+head(xx2)
+zzz <- df_fin %>% anti_join(df_lu_dest_rto, by = c("DestinationRTO" = "Description"))
+zzz
+head(df_lu_acccom_type)
+xx3 <- df_fin %>% inner_join(df_lu_acccom_type, by = c("AccommodationType" = "Description"))
+head(xx3)
+nrow(xx3)
+zzz4 <- df_fin %>% anti_join(df_lu_acccom_type, by = c("AccommodationType" = "Description"))
+head(zzz4)
+unique(zzz4$AccommodationType)
+unique(df_fin$AccommodationType)
+unique(df_fin$AccommodationType)
+unique(df_lu_acccom_type$Description)
+# clear everything#
+rm(list = ls())#
+#
+# load some libaries #
+#library(lubridate)#
 library(dplyr)#
+library(stringr)#
 #
 options(stringsAsFactors = FALSE)#
 setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
-source('functions/fn_create_date.R')#
-source('functions/fn_create_whole_years.R')#
-source('functions/fn_calc_lagged_date.R')#
-source('functions/fn_calculate_component_quarters.R')#
+#
+# calculates "length of stay"#
 source('functions/fn_calc_los.R')#
-source('functions/fn_create_year_end.R')#
+# creates a data.frame of column combinations for use in a group_by#
 source('functions/fn_create_column_combinations.R')#
-source('functions/fn_create_df_with_all.R')#
+# uses column combinations to create various group_by#
 source('functions/fn_create_comb_aggregates.R')#
-# load some data#
+# appends columns to a data.frame such that resultant df is always 8 columns wide#
+source('functions/fn_create_df_with_all.R')#
+# appends a data.frame with four columns#
+source('functions/fn_create_year_end.R')#
+# converts floating point number to text#
+source('functions/fn_convert_to_text.R')#
+# PREAMBLE (data relationships)#
+# relationship between df_trips & df_accomodation: a person makes a trip and...#
+# stays in accomodation. When a person makes a day trip there is no need for..#
+# accomodation. Therefore only "Overnight trips" are included #
+# A single trip can have multiple accomodation values as a person..#
+# can stay in different hotels in the same or different locations#
+# the data is quarterly data#
+#
+# PLAN OF ATTACK#
+# 1) load two CSV files #
+# 2) process the two CVS files#
+# 3) create a data frame of complete years (where the number of quarters = 4)#
+# 4) combine the two data frames and aggregate by: #
+#		a) year end (4 quarterly year ends) and#
+#		b) four dimension variables#
+# 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
+# 6) create various aggregate combinations#
+# (1) LOAD data#
 df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
 df_accomodation <- read.csv("data/vw_DTSVisitAccommodation.csv", header = TRUE)#
-# create a quarter end date from quarter number and year#
-df_trips$QEDate <- fn_create_date(df_trips$TripQtr, df_trips$TripYear)#
-#
-# create a data frame of unique whole years (there are 53)#
-df_wy <- df_trips %>% #
-		fn_create_whole_years() %>% #
-		# creates four columns of year ends#
-		fn_create_year_end()#
-vct_wy <-  unique(c(df_wy$YEMar, df_wy$YEJun, df_wy$YESep, df_wy$YEDec))#
-# a specific year end consists of 4 component quarters. These are time contiguous  (there are 56)#
-#vct_component_quarters <- fn_calculate_component_quarters(df_whole_years$whole_year)#
-# delete uneeded columns & include only "Overnight trip" as.. these have associated Accomodation values#
-df_trips <- df_trips %>% select(c(SurveyResponseID,TripIDNumber,TripType, QEDate,TripYear,#
-		TripQtr, DestinationRTO, RespondentWeight, SmoothedTripWeight)) %>%#
-		filter(TripType == "Overnight Trip")#
-# add 4 extra columns. These will be used in group by calculations#
-df_trips <- fn_create_year_end(df_trips)#
-df_YE_Mar <- df_trips %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
-df_YE_Jun <- df_trips %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
-df_YE_Sep <- df_trips %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
-df_YE_Dec <- df_trips %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
-df_YE_all <- df_YE_Mar %>% bind_rows(df_YE_Jun) %>% #
-	bind_rows(df_YE_Sep) %>% bind_rows(df_YE_Dec) %>% group_by(YE) %>% #
-	summarise(count = n()) %>% filter(count == 4) %>% select(YE)#
-# include only the necessary stuff for df_accomodation#
+# (2.1) PROCESS df_accomodation#
+# for df_accomodation: select relevent columns; create a new column#
 df_accomodation <- df_accomodation %>% select(TripID, AccommodationType, NoNights)#
-#
-# calculate length of stay group#
+# convert any NAs to zeros#
+df_accomodation[is.na(df_accomodation$NoNights), "NoNights"] <- 0#
 df_accomodation$LOS_Group <- fn_calc_los(df_accomodation$NoNights)#
+# (2.2) PROCESS df_trips#
+# delete uneeded columns & include only "Overnight trips" (nrow = 90693)#
+df_trips_overnight <- df_trips %>% filter(TripType == "Overnight Trip") %>% #
+		select(c(TripIDNumber,TripType, TripYear,#
+		TripQtr, DestinationRTO, RespondentWeight, SmoothedTripWeight))
+head(df_trips_overnight)
+head(df_accomodation)
+unique(df_accomodation$AccommodationType)
+df_accomodation$AccommodationType == "Employer provided accomodation"
+# clear everything#
+rm(list = ls())#
+#
+# load some libaries #
+#library(lubridate)#
+library(dplyr)#
+library(stringr)#
+#
+options(stringsAsFactors = FALSE)#
+setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
+#
+# calculates "length of stay"#
+source('functions/fn_calc_los.R')#
+# creates a data.frame of column combinations for use in a group_by#
+source('functions/fn_create_column_combinations.R')#
+# uses column combinations to create various group_by#
+source('functions/fn_create_comb_aggregates.R')#
+# appends columns to a data.frame such that resultant df is always 8 columns wide#
+source('functions/fn_create_df_with_all.R')#
+# appends a data.frame with four columns#
+source('functions/fn_create_year_end.R')#
+# converts floating point number to text#
+source('functions/fn_convert_to_text.R')#
+# PREAMBLE (data relationships)#
+# relationship between df_trips & df_accomodation: a person makes a trip and...#
+# stays in accomodation. When a person makes a day trip there is no need for..#
+# accomodation. Therefore only "Overnight trips" are included #
+# A single trip can have multiple accomodation values as a person..#
+# can stay in different hotels in the same or different locations#
+# the data is quarterly data#
+#
+# PLAN OF ATTACK#
+# 1) load two CSV files #
+# 2) process the two CVS files#
+# 3) create a data frame of complete years (where the number of quarters = 4)#
+# 4) combine the two data frames and aggregate by: #
+#		a) year end (4 quarterly year ends) and#
+#		b) four dimension variables#
+# 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
+# 6) create various aggregate combinations#
+# (1) LOAD data#
+df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
+df_accomodation <- read.csv("data/vw_DTSVisitAccommodation.csv", header = TRUE)#
+# (2.1) PROCESS df_accomodation#
+# for df_accomodation: select relevent columns; create a new column#
+df_accomodation <- df_accomodation %>% select(TripID, AccommodationType, NoNights)#
+# convert any NAs to zeros#
+df_accomodation[is.na(df_accomodation$NoNights), "NoNights"] <- 0#
+# clean up miss-spelling#
+df_accomodation[df_accomodation$AccommodationType == #
+	"Employer provided accomodation", "AccommodationType"] <- #
+	"Employer provided accommodation"
+# calculate a column#
+df_accomodation$LOS_Group <- fn_calc_los(df_accomodation$NoNights)#
+# (2.2) PROCESS df_trips#
+# delete uneeded columns & include only "Overnight trips" (nrow = 90693)#
+df_trips_overnight <- df_trips %>% filter(TripType == "Overnight Trip") %>% #
+		select(c(TripIDNumber,TripType, TripYear,#
+		TripQtr, DestinationRTO, RespondentWeight, SmoothedTripWeight)) #
+#
+# clean up some columns#
+df_trips_overnight[is.na(df_trips_overnight$RespondentWeight), "RespondentWeight"] <- 0#
+df_trips_overnight[is.na(df_trips_overnight$SmoothedTripWeight), "SmoothedTripWeight"] <- 0#
+df_trips_overnight[df_trips_overnight$DestinationRTO == "Other   ", "DestinationRTO"] <- "Other"#
+# clean up#
+rm(df_trips, fn_calc_los)#
+# (3) CREATE a data frame of complete years. #
+# add 4 extra columns. These will be used in group by calculations (nrow = 90693)#
+df_trips_overnight <- fn_create_year_end(df_trips_overnight)#
+#
+# (3.1) create four data frames with unique year ending values#
+df_YE_Mar <- df_trips_overnight  %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
+df_YE_Jun <- df_trips_overnight  %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
+df_YE_Sep <- df_trips_overnight  %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
+df_YE_Dec <- df_trips_overnight  %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
+#
+# (3.2) stack the four data frames; include whole year values; select a single column#
+df_YE_all <- bind_rows(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec) %>%#
+			group_by(YE) %>% summarise(count = n()) %>% #
+			filter(count == 4) %>% select(YE)#
+# clean up			#
+rm(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec)#
+# (4) COMBINE two data frames into one#
 # combine the two data frames into one, do some renaming, grouping and aggregating#
-df_combined <- df_trips %>% #
+df_combined <- df_trips_overnight %>% #
 	inner_join(df_accomodation, by = c("TripIDNumber"  = "TripID")) %>% #
 	mutate(TotalNights = NoNights * SmoothedTripWeight, TotalRespondents = 1) %>%#
 	rename(TotalVisitors = RespondentWeight, TotalTrips = SmoothedTripWeight) %>%#
-	select(YEDec, YESep, YEJun, YEMar, QEDate, LOS_Group, DestinationRTO, #
+	select(YEDec, YESep, YEJun, YEMar,  LOS_Group, DestinationRTO, #
 		AccommodationType, TotalVisitors, TotalTrips, TotalNights, TotalRespondents) %>%#
-	group_by(YEDec, YESep, YEJun, YEMar, QEDate, LOS_Group, DestinationRTO, AccommodationType ) %>%#
+	group_by(YEDec, YESep, YEJun, YEMar, LOS_Group, DestinationRTO, AccommodationType ) %>%#
 	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
 		TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents))#
-#
+# clean up#
+rm(df_accomodation, df_trips_overnight)#
+# (5) CREATE Year Ending aggregates and filter to include full ears#
 # create a vector of 4 different columns stacked on top of each other#
 YE <- c(df_combined$YEDec, df_combined$YESep, df_combined$YEJun, df_combined$YEMar)#
 #
 # duplicate the same data frame 4 time and stack on top of each other (158188 rows)#
 df_four_quarters <- rbind(df_combined, df_combined, df_combined, df_combined)#
+#
 # combine the previously created vector with the stacked data frames #
 # unfiltered is 93734 rows, filtered is 86511 rows#
 df_base_aggregates <- cbind(YE, df_four_quarters) %>%#
-	select(-c(YEDec, YESep, YEJun, YEMar, QEDate))  %>%#
+	select(-c(YEDec, YESep, YEJun, YEMar))  %>%#
 	group_by(YE, LOS_Group, DestinationRTO, AccommodationType) %>%#
-	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
-	TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents)) %>%  #
+	summarise(Total_Visitors = sum(TotalVisitors), Total_Trips = sum(TotalTrips), #
+	Total_Nights = sum(TotalNights), Total_Respondents = sum(TotalRespondents)) %>%  #
 	filter(YE %in% df_YE_all$YE)#
-# ==================================================================#
-# get the names of the dimensions#
+#
+# Following are reconciliations checks. To be commented in / out#
+# options(digits = 22)#
+# df_base_aggregates %>% ungroup() %>% #
+#	summarise (Total_Visitors =  sum(Total_Visitors), Total_Trips = sum(Total_Trips), #
+#	Total_Nights = sum(Total_Nights), Total_Respondents = sum(Total_Respondents))#
+# clean up#
+rm(df_combined, df_four_quarters, df_YE_all, YE)#
+# (6) CREATE various aggregate combinations#
+# PREAMBLE for  (6)#
+# There are four dimenions columns. The total number of group_by combinations of these are:#
+# 2^4 = 16.  1 of these has been previously created (see 'df_base_aggregates' )...#
+# the remaining 15 combinations are created below.  Of these 15 combinations, 14 are created#
+# programmatically (see 6.5). The remaining combination is created as a single line of code (see 6.6)#
+#
+# (6.1) get the dimenions names#
 vct_dim_names <- names(df_base_aggregates)[1:4]#
-lst_aggregations <- list("sum(TotalVisitors)", "sum(TotalTrips)", #
-	"sum(TotalNights)", "sum(TotalRespondents)")#
+#
+# (6.2) create a "summarise" clause (for multiple use later)#
+lst_aggregations <- list("sum(Total_Visitors)", "sum(Total_Trips)", #
+	"sum(Total_Nights)", "sum(Total_Respondents)")#
 #
 agg_names <- c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents")#
-vct_col_sort <- c(vct_dim_names, agg_names)#
-lst_combinations <- fn_create_column_combinations(vct_dim_names)#
 #
 lst_sum_clause <- setNames(lst_aggregations, agg_names)#
 #
-# send each element of 'lst_combinations' to 'fn_create_comb_aggregates()'#
+# (6.3) sort order of the columns#
+vct_col_sort <- c(vct_dim_names, agg_names)#
+#
+# (6.4) There are four columns resulting in 2^4 = 16 combinations...#
+# we now create 14 of these combinations#
+lst_combinations <- fn_create_column_combinations(vct_dim_names)#
+#
+# (6.5) Create a list of data frames Each list element is a data frame#
+# based on a column combination created in 6.4#
 lst_aggregations <- lapply(lst_combinations, function(x) #
-	fn_create_comb_aggregates(df_base_aggregates, x, lst_sum_clause))
+	fn_create_comb_aggregates(df_base_aggregates, x, lst_sum_clause))#
+#
+# (6.5.1) combine the list of data frames into a single data frame#
+df.aggregations <- do.call(bind_rows, lst_aggregations)#
+#
+# (6.6) grand totals#
+df_totals <- df_base_aggregates %>% ungroup() %>% #
+				summarise_(.dots = lst_sum_clause) %>% #
+				fn_create_df_with_all(vct_dim_names, vct_col_sort)#
+# clean up#
+rm(fn_create_column_combinations, fn_create_comb_aggregates, fn_create_df_with_all)#
+rm(fn_create_year_end, lst_aggregations, lst_sum_clause, vct_col_sort)#
+#
+# (7) combine all aggregates into a single data frame#
+# total rows = 86511 + 71114 + 1 = 157626#
+df_consolidated <- bind_rows(df_base_aggregates, df.aggregations, df_totals)#
+# (7.1) convert numeric columns to text with 0 decimal places#
+df_fin <- sapply(df_consolidated[, agg_names], function(x) fn_convert_to_text(x)) %>%#
+ 			# convert sapply's matrix to a data frame#
+ 			as.data.frame() %>%#
+ 			# club the original columns together with the new text columns#
+ 			bind_cols(df_consolidated[, vct_dim_names, ], .)#
+#
+#clean up#
+rm(df_base_aggregates, df_totals, df.aggregations, lst_combinations)#
+rm(agg_names, fn_convert_to_text, vct_dim_names)#
+df_lu_acccom_type <- read.csv("outputs/DimenLookupAccommodationTypeAccommodation.csv", header = TRUE)#
+df_lu_dest_rto <- read.csv("outputs/DimenLookupDestinationRTOAccommodation.csv", header = TRUE)#
+df_lu_LOS <- read.csv("outputs/DimenLookupLOS_groupAccommodation.csv", header = TRUE)#
+xx1 <- df_fin %>% inner_join(df_lu_LOS, by = c("LOS_Group" = "Description")) %>% #
+		mutate(LOS_Group = Code) %>% #
+		select(-c(Code, SortOrder))#
+xx2 <- df_fin %>% inner_join(df_lu_dest_rto, by = c("DestinationRTO" = "Description")) %>% #
+		mutate(DestinationRTO = Code) %>% #
+		select(-c(Code, SortOrder))#
+xx3 <- df_fin %>% inner_join(df_lu_acccom_type, by = c("AccommodationType" = "Description")) %>% #
+		mutate(DestinationRTO = Code) %>% #
+		select(-c(Code, SortOrder))#
+zzz4 <- df_fin %>% anti_join(df_lu_acccom_type, by = c("AccommodationType" = "Description"))
+zzz4
+nrow(xx3)
+uy <- df_fin$YE
+uy <- unique(df_fin$YE)
+uy
+uy <- unique(nchar(df_fin$YE))
+uy
+?substr
+uy <- unique(nchar(df_fin$YE == 9))
+uy
+nchar(df_fin$YE) == 9
+df_fin[nchar(df_fin$YE) == 9, "YE"]
+distinct(df_fin[nchar(df_fin$YE) == 9, "YE"])
+distinct_(df_fin[nchar(df_fin$YE) == 9, "YE"])
+unique(df_fin[nchar(df_fin$YE) == 9, "YE"])
+vct_YE <- unique(df_fin[nchar(df_fin$YE) == 9, "YE"])
+substrRight <- function(x, n){#
+  substr(x, nchar(x)-n+1, nchar(x))#
+}
+substrRight(vct_YE)
+substrRight(vct_YE,4)
+as.numeric(substrRight(vct_YE,4))
+substr(vct_YE, 3, 5)
+vct_month <- substr(vct_YE, 3, 5)
+?match
+match("Dec" c("Mar", "Jun", "Sep", "Dec"))
+match("Dec" c("Mar", "Jun", "Sep", "Dec"))
+match("Dec", c("Mar", "Jun", "Sep", "Dec"))
+vct_quarter <- match(vct_month, c("Mar", "Jun", "Sep", "Dec"))
+vct_quarter
+df_year <- data.frame(YE = vct_YE, year = vct_year, month =  vct_month, qtr = vct_quarter)
+vct_YE <- unique(df_fin[nchar(df_fin$YE) == 9, "YE"])#
+vct_year <- as.numeric(substrRight(vct_YE,4))#
+vct_month <- substr(vct_YE, 3, 5)#
+vct_quarter <- match(vct_month, c("Mar", "Jun", "Sep", "Dec"))#
+#
+df_year <- data.frame(YE = vct_YE, year = vct_year, month =  vct_month, qtr = vct_quarter)
+head(df_year)
+str(df_year)
+df_year %>% arrange(year, qtr)
+df_year %>% arrange(year, qtr) %>% mutate(order = n)
+df_year %>% arrange(year, qtr) %>% mutate(order = n())
+df_year %>% arrange(year, qtr) %>% mutate(order = nth())
+df_year %>% arrange(year, qtr) %>% mutate(order = 1:n())
+df_year <- df_year %>% arrange(year, qtr) %>% mutate(order = 1:n())
+df_y <- df_year %>% arrange(year, qtr) %>% #
+			mutate(order = 1:n()) %>% #
+			mutate(Description = paste0("YE", month, " ", year))
+df_y
+df_y <- df_year %>% arrange(year, qtr) %>% #
+			mutate(Code = 1:n()) %>% #
+			mutate(Description = paste0("YE", month, " ", year)) %>%#
+			select(c(year, month, qtr))
+df_y
+df_y <- df_year %>% arrange(year, qtr) %>% #
+			mutate(Code = 1:n()) %>% #
+			mutate(Description = paste0("YE", month, " ", year)) %>%#
+			select(-c(year, month, qtr))
+df_y
+df_year <- df_year %>% arrange(year, qtr) %>% #
+			mutate(Code = 1:n()) %>% #
+			mutate(Description = paste0("YE", month, " ", year)) %>%#
+			select(-c(year, month, qtr))
+df_year
+df_year <- data.frame(YE = vct_YE, year = vct_year, month =  vct_month, qtr = vct_quarter)#
+#
+df_year <- df_year %>% arrange(year, qtr) %>% #
+			mutate(Code = 1:n()) %>% #
+			mutate(Description = paste0("YE", month, " ", year)) %>%#
+			select(-c(year, month, qtr))
+df_year
+df_year <- data.frame(YE = vct_YE, year = vct_year, month =  vct_month, qtr = vct_quarter)#
+#
+df_year <- df_year %>% arrange(year, qtr) %>% #
+			mutate(Code = 1:n()) %>% #
+			mutate(Description = paste0("YE", month, " ", year)) %>%#
+			select(-c(year, month, qtr)) %>%#
+			mutate(SortOrder = Code)
+df_year
+head(df_year)
+df_all <- (YE = "All", Code = nr + 1, Description = "All", SortOrder = nr + 1)
+df_all <- data.frame(YE = "All", Code = nr + 1, Description = "All", SortOrder = nr + 1)
+nr <- nrow(df_year)#
+#
+df_all <- data.frame(YE = "All", Code = nr + 1, Description = "All", SortOrder = nr + 1)
+df_all
+fn_create_YE_lookup <- function(a_vctYE) {#
+	substrRight <- function(x, n){#
+	  substr(x, nchar(x)-n+1, nchar(x))#
+	}#
+	vct_YE <- unique(nchar(a_vctYE) == 9)#
+	vct_year <- as.numeric(substrRight(vct_YE,4))#
+	vct_month <- substr(vct_YE, 3, 5)#
+	vct_quarter <- match(vct_month, c("Mar", "Jun", "Sep", "Dec"))#
+	df_year <- data.frame(YE = vct_YE, year = vct_year, month =  vct_month, qtr = vct_quarter)#
+	df_year <- df_year %>% arrange(year, qtr) %>% #
+				mutate(Code = 1:n()) %>% #
+				mutate(Description = paste0("YE", month, " ", year)) %>%#
+				select(-c(year, month, qtr)) %>%#
+				mutate(SortOrder = Code)#
+	nr <- nrow(df_year)#
+	df_all <- data.frame(YE = "All", Code = nr + 1, Description = "All", SortOrder = nr + 1)#
+	df_return <- bind_rows(df_year, df_all)#
+#
+}
+fn_create_YE_lookup(df_fin$YE)
+unique(nchar(df_fin$YE) == 9)
+unique(nchar(df_fin$YE) == 9)
+a_vctYE <- df_fin$YE
+head(a_vctYE)
+a_vctYE[nchar(a_vctYE) == 9]
+unique(a_vctYE[nchar(a_vctYE) == 9])
+fn_create_YE_lookup <- function(a_vctYE) {#
+	substrRight <- function(x, n){#
+	  substr(x, nchar(x)-n+1, nchar(x))#
+	}#
+	vct_YE <- unique(a_vctYE[nchar(a_vctYE) == 9])#
+	vct_year <- as.numeric(substrRight(vct_YE,4))#
+	vct_month <- substr(vct_YE, 3, 5)#
+	vct_quarter <- match(vct_month, c("Mar", "Jun", "Sep", "Dec"))#
+	df_year <- data.frame(YE = vct_YE, year = vct_year, month =  vct_month, qtr = vct_quarter)#
+	df_year <- df_year %>% arrange(year, qtr) %>% #
+				mutate(Code = 1:n()) %>% #
+				mutate(Description = paste0("YE", month, " ", year)) %>%#
+				select(-c(year, month, qtr)) %>%#
+				mutate(SortOrder = Code)#
+	nr <- nrow(df_year)#
+	df_all <- data.frame(YE = "All", Code = nr + 1, Description = "All", SortOrder = nr + 1)#
+	df_return <- bind_rows(df_year, df_all)#
+#
+}
+fn_create_YE_lookup(df_fin$YE)
+aa <- fn_create_YE_lookup(df_fin$YE)
+aa
+source('functions/fn_create_YE_lookup.R')
+fn_create_YE_lookup
+fn_create_YE_lookup(df_fin$YE)
+nn <- fn_create_YE_lookup(df_fin$YE)
+nn
+df_lu_YE <- fn_create_YE_lookup(df_fin$YE)
+df_lu_YE
+str(df_lu_YE)
+head(df_fin)
+xx4 <- df_fin %>% inner_join(df_lu_YE, by = c("YE" = "YE")) %>% #
+		mutate(YE = Code) %>% #
+		select(-c(Code, SortOrder))
+head(xx4)
+xx4 <- df_fin %>% inner_join(df_lu_YE, by = c("YE" = "YE")) %>% #
+		mutate(YE = Code) %>% #
+		select(-c(Code, SortOrder, Description))
+xx4
+head(xx4)
+nrow(xx4)
+xx1 <- df_fin %>% inner_join(df_lu_LOS, by = c("LOS_Group" = "Description")) %>% #
+		mutate(LOS_Group = Code) %>% #
+		select(-c(Code, SortOrder)) %>% #
+		inner_join(df_lu_dest_rto, by = c("DestinationRTO" = "Description")) %>% #
+		mutate(DestinationRTO = Code) %>% #
+		select(-c(Code, SortOrder)) %>%#
+		inner_join(df_lu_acccom_type, by = c("AccommodationType" = "Description")) %>% #
+		mutate(DestinationRTO = Code) %>% #
+		select(-c(Code, SortOrder)) %>%#
+ 		inner_join(df_lu_YE, by = c("YE" = "YE")) %>% #
+		mutate(YE = Code) %>% #
+		select(-c(Code, SortOrder, Description))
+nrow(xx1)
+head(xx1)
+xx1 <- df_fin %>% #
+		inner_join(df_lu_LOS, by = c("LOS_Group" = "Description")) %>% #
+		mutate(LOS_Group = Code) %>% #
+		select(-c(Code, SortOrder)) %>% #
+		inner_join(df_lu_dest_rto, by = c("DestinationRTO" = "Description")) %>% #
+		mutate(DestinationRTO = Code) %>% #
+		select(-c(Code, SortOrder)) %>%#
+		inner_join(df_lu_acccom_type, by = c("AccommodationType" = "Description")) %>% #
+		mutate(AccommodationType = Code) %>% #
+		select(-c(Code, SortOrder)) %>%#
+ 		inner_join(df_lu_YE, by = c("YE" = "YE")) %>% #
+		mutate(YE = Code) %>% #
+		select(-c(Code, SortOrder, Description))
+head(xx1)
+xx1 <- df_fin %>% #
+		inner_join(df_lu_LOS, by = c("LOS_Group" = "Description")) %>% #
+		mutate(LOS_Group = Code) %>% #
+		select(-c(Code, SortOrder)) %>% #
+		inner_join(df_lu_dest_rto, by = c("DestinationRTO" = "Description")) %>% #
+		mutate(DestinationRTO = Code) %>% #
+		select(-c(Code, SortOrder)) %>%#
+		inner_join(df_lu_acccom_type, by = c("AccommodationType" = "Description")) %>% #
+		mutate(AccommodationType = Code) %>% #
+		select(-c(Code, SortOrder)) %>%#
+ 		inner_join(df_lu_YE, by = c("YE" = "YE")) %>% #
+		mutate(YE = Code) %>% #
+		select(-c(Code, SortOrder, Description)) %>%#
+		rename(Year_ending = YE)
+head(xx1)
+# clear everything#
+rm(list = ls())#
+#
+# load some libaries #
+#library(lubridate)#
+library(dplyr)#
+library(stringr)#
+#
+options(stringsAsFactors = FALSE)#
+setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
+#
+# calculates "length of stay"#
+source('functions/fn_calc_los.R')#
+# creates a data.frame of column combinations for use in a group_by#
+source('functions/fn_create_column_combinations.R')#
+# uses column combinations to create various group_by#
+source('functions/fn_create_comb_aggregates.R')#
+# appends columns to a data.frame such that resultant df is always 8 columns wide#
+source('functions/fn_create_df_with_all.R')#
+# appends a data.frame with four columns#
+source('functions/fn_create_year_end.R')#
+# converts floating point number to text#
+source('functions/fn_convert_to_text.R')#
+# creates a year end lookup table#
+source('functions/fn_create_YE_lookup.R')#
+# PREAMBLE (data relationships)#
+# relationship between df_trips & df_accomodation: a person makes a trip and...#
+# stays in accomodation. When a person makes a day trip there is no need for..#
+# accomodation. Therefore only "Overnight trips" are included #
+# A single trip can have multiple accomodation values as a person..#
+# can stay in different hotels in the same or different locations#
+# the data is quarterly data#
+#
+# PLAN OF ATTACK#
+# 1) load two CSV files #
+# 2) process the two CVS files#
+# 3) create a data frame of complete years (where the number of quarters = 4)#
+# 4) combine the two data frames and aggregate by: #
+#		a) year end (4 quarterly year ends) and#
+#		b) four dimension variables#
+# 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
+# 6) create various aggregate combinations#
+# (1) LOAD data#
+df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
+df_accomodation <- read.csv("data/vw_DTSVisitAccommodation.csv", header = TRUE)#
+# (2.1) PROCESS df_accomodation#
+# for df_accomodation: select relevent columns; create a new column#
+df_accomodation <- df_accomodation %>% select(TripID, AccommodationType, NoNights)#
+# convert any NAs to zeros#
+df_accomodation[is.na(df_accomodation$NoNights), "NoNights"] <- 0#
+# clean up miss-spelling#
+df_accomodation[df_accomodation$AccommodationType == #
+	"Employer provided accomodation", "AccommodationType"] <- #
+	"Employer provided accommodation"#
+#
+# calculate a column#
+df_accomodation$LOS_Group <- fn_calc_los(df_accomodation$NoNights)#
+# (2.2) PROCESS df_trips#
+# delete uneeded columns & include only "Overnight trips" (nrow = 90693)#
+df_trips_overnight <- df_trips %>% filter(TripType == "Overnight Trip") %>% #
+		select(c(TripIDNumber,TripType, TripYear,#
+		TripQtr, DestinationRTO, RespondentWeight, SmoothedTripWeight)) #
+#
+# clean up some columns#
+df_trips_overnight[is.na(df_trips_overnight$RespondentWeight), "RespondentWeight"] <- 0#
+df_trips_overnight[is.na(df_trips_overnight$SmoothedTripWeight), "SmoothedTripWeight"] <- 0#
+df_trips_overnight[df_trips_overnight$DestinationRTO == "Other   ", "DestinationRTO"] <- "Other"#
+# clean up#
+rm(df_trips, fn_calc_los)#
+# (3) CREATE a data frame of complete years. #
+# add 4 extra columns. These will be used in group by calculations (nrow = 90693)#
+df_trips_overnight <- fn_create_year_end(df_trips_overnight)#
+#
+# (3.1) create four data frames with unique year ending values#
+df_YE_Mar <- df_trips_overnight  %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
+df_YE_Jun <- df_trips_overnight  %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
+df_YE_Sep <- df_trips_overnight  %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
+df_YE_Dec <- df_trips_overnight  %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
+#
+# (3.2) stack the four data frames; include whole year values; select a single column#
+df_YE_all <- bind_rows(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec) %>%#
+			group_by(YE) %>% summarise(count = n()) %>% #
+			filter(count == 4) %>% select(YE)#
+# clean up			#
+rm(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec)#
+# (4) COMBINE two data frames into one#
+# combine the two data frames into one, do some renaming, grouping and aggregating#
+df_combined <- df_trips_overnight %>% #
+	inner_join(df_accomodation, by = c("TripIDNumber"  = "TripID")) %>% #
+	mutate(TotalNights = NoNights * SmoothedTripWeight, TotalRespondents = 1) %>%#
+	rename(TotalVisitors = RespondentWeight, TotalTrips = SmoothedTripWeight) %>%#
+	select(YEDec, YESep, YEJun, YEMar,  LOS_Group, DestinationRTO, #
+		AccommodationType, TotalVisitors, TotalTrips, TotalNights, TotalRespondents) %>%#
+	group_by(YEDec, YESep, YEJun, YEMar, LOS_Group, DestinationRTO, AccommodationType ) %>%#
+	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
+		TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents))#
+# clean up#
+rm(df_accomodation, df_trips_overnight)#
+# (5) CREATE Year Ending aggregates and filter to include full ears#
+# create a vector of 4 different columns stacked on top of each other#
+YE <- c(df_combined$YEDec, df_combined$YESep, df_combined$YEJun, df_combined$YEMar)#
+#
+# duplicate the same data frame 4 time and stack on top of each other (158188 rows)#
+df_four_quarters <- rbind(df_combined, df_combined, df_combined, df_combined)#
+#
+# combine the previously created vector with the stacked data frames #
+# unfiltered is 93734 rows, filtered is 86511 rows#
+df_base_aggregates <- cbind(YE, df_four_quarters) %>%#
+	select(-c(YEDec, YESep, YEJun, YEMar))  %>%#
+	group_by(YE, LOS_Group, DestinationRTO, AccommodationType) %>%#
+	summarise(Total_Visitors = sum(TotalVisitors), Total_Trips = sum(TotalTrips), #
+	Total_Nights = sum(TotalNights), Total_Respondents = sum(TotalRespondents)) %>%  #
+	filter(YE %in% df_YE_all$YE)#
+#
+# Following are reconciliations checks. To be commented in / out#
+# options(digits = 22)#
+# df_base_aggregates %>% ungroup() %>% #
+#	summarise (Total_Visitors =  sum(Total_Visitors), Total_Trips = sum(Total_Trips), #
+#	Total_Nights = sum(Total_Nights), Total_Respondents = sum(Total_Respondents))#
+# clean up#
+rm(df_combined, df_four_quarters, df_YE_all, YE)#
+# (6) CREATE various aggregate combinations#
+# PREAMBLE for  (6)#
+# There are four dimenions columns. The total number of group_by combinations of these are:#
+# 2^4 = 16.  1 of these has been previously created (see 'df_base_aggregates' )...#
+# the remaining 15 combinations are created below.  Of these 15 combinations, 14 are created#
+# programmatically (see 6.5). The remaining combination is created as a single line of code (see 6.6)#
+#
+# (6.1) get the dimenions names#
+vct_dim_names <- names(df_base_aggregates)[1:4]#
+#
+# (6.2) create a "summarise" clause (for multiple use later)#
+lst_aggregations <- list("sum(Total_Visitors)", "sum(Total_Trips)", #
+	"sum(Total_Nights)", "sum(Total_Respondents)")#
+#
+agg_names <- c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents")#
+#
+lst_sum_clause <- setNames(lst_aggregations, agg_names)#
+#
+# (6.3) sort order of the columns#
+vct_col_sort <- c(vct_dim_names, agg_names)#
+#
+# (6.4) There are four columns resulting in 2^4 = 16 combinations...#
+# we now create 14 of these combinations#
+lst_combinations <- fn_create_column_combinations(vct_dim_names)#
+#
+# (6.5) Create a list of data frames Each list element is a data frame#
+# based on a column combination created in 6.4#
+lst_aggregations <- lapply(lst_combinations, function(x) #
+	fn_create_comb_aggregates(df_base_aggregates, x, lst_sum_clause))#
+#
+# (6.5.1) combine the list of data frames into a single data frame#
+df.aggregations <- do.call(bind_rows, lst_aggregations)#
+#
+# (6.6) grand totals#
+df_totals <- df_base_aggregates %>% ungroup() %>% #
+				summarise_(.dots = lst_sum_clause) %>% #
+				fn_create_df_with_all(vct_dim_names, vct_col_sort)#
+# clean up#
+rm(fn_create_column_combinations, fn_create_comb_aggregates, fn_create_df_with_all)#
+rm(fn_create_year_end, lst_aggregations, lst_sum_clause, vct_col_sort)#
+#
+# (7) combine all aggregates into a single data frame#
+# total rows = 86511 + 71114 + 1 = 157626#
+df_consolidated <- bind_rows(df_base_aggregates, df.aggregations, df_totals)#
+# (7.1) convert numeric columns to text with 0 decimal places#
+df_fin <- sapply(df_consolidated[, agg_names], function(x) fn_convert_to_text(x)) %>%#
+ 			# convert sapply's matrix to a data frame#
+ 			as.data.frame() %>%#
+ 			# club the original columns together with the new text columns#
+ 			bind_cols(df_consolidated[, vct_dim_names, ], .)#
+#
+#clean up#
+rm(df_base_aggregates, df_totals, df.aggregations, lst_combinations)#
+rm(agg_names, fn_convert_to_text, vct_dim_names)#
+# (8) LOOKUPS#
+# (8.1) import lookup tables and create lookup for year end#
+df_lu_acccom_type <- read.csv("outputs/DimenLookupAccommodationTypeAccommodation.csv", header = TRUE)#
+df_lu_dest_rto <- read.csv("outputs/DimenLookupDestinationRTOAccommodation.csv", header = TRUE)#
+df_lu_LOS <- read.csv("outputs/DimenLookupLOS_groupAccommodation.csv", header = TRUE)#
+df_lu_YE <- fn_create_YE_lookup(df_fin$YE)#
+#
+# (8.2) based on the lookup tables created, replace string values with numeric lookups for the...#
+# 4 dimensions#
+df_fin_lu <- df_fin %>% #
+			inner_join(df_lu_LOS, by = c("LOS_Group" = "Description")) %>% #
+			mutate(LOS_Group = Code) %>% #
+			select(-c(Code, SortOrder)) %>% #
+			inner_join(df_lu_dest_rto, by = c("DestinationRTO" = "Description")) %>% #
+			mutate(DestinationRTO = Code) %>% #
+			select(-c(Code, SortOrder)) %>%#
+			inner_join(df_lu_acccom_type, by = c("AccommodationType" = "Description")) %>% #
+			mutate(AccommodationType = Code) %>% #
+			select(-c(Code, SortOrder)) %>%#
+ 			inner_join(df_lu_YE, by = c("YE" = "YE")) %>% #
+			mutate(YE = Code) %>% #
+			select(-c(Code, SortOrder, Description)) %>%#
+			rename(Year_ending = YE)
+ls()
+rm(df_consolidated, fn_create_YE_lookup)
+# clear everything#
+rm(list = ls())#
+#
+# load some libaries #
+#library(lubridate)#
+library(dplyr)#
+library(stringr)#
+#
+options(stringsAsFactors = FALSE)#
+setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
+#
+# calculates "length of stay"#
+source('functions/fn_calc_los.R')#
+# creates a data.frame of column combinations for use in a group_by#
+source('functions/fn_create_column_combinations.R')#
+# uses column combinations to create various group_by#
+source('functions/fn_create_comb_aggregates.R')#
+# appends columns to a data.frame such that resultant df is always 8 columns wide#
+source('functions/fn_create_df_with_all.R')#
+# appends a data.frame with four columns#
+source('functions/fn_create_year_end.R')#
+# converts floating point number to text#
+source('functions/fn_convert_to_text.R')#
+# creates  yearend lookup table#
+source('functions/fn_create_YE_lookup.R')#
+# PREAMBLE (data relationships)#
+# relationship between df_trips & df_accomodation: a person makes a trip and...#
+# stays in accomodation. When a person makes a day trip there is no need for..#
+# accomodation. Therefore only "Overnight trips" are included #
+# A single trip can have multiple accomodation values as a person..#
+# can stay in different hotels in the same or different locations#
+# the data is quarterly data#
+#
+# PLAN OF ATTACK#
+# 1) load two CSV files #
+# 2) process the two CVS files#
+# 3) create a data frame of complete years (where the number of quarters = 4)#
+# 4) combine the two data frames and aggregate by: #
+#		a) year end (4 quarterly year ends) and#
+#		b) four dimension variables#
+# 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
+# 6) create various aggregate combinations#
+# (1) LOAD data#
+df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
+df_accomodation <- read.csv("data/vw_DTSVisitAccommodation.csv", header = TRUE)#
+# (2.1) PROCESS df_accomodation#
+# for df_accomodation: select relevent columns; create a new column#
+df_accomodation <- df_accomodation %>% select(TripID, AccommodationType, NoNights)#
+# convert any NAs to zeros#
+df_accomodation[is.na(df_accomodation$NoNights), "NoNights"] <- 0#
+# clean up miss-spelling#
+df_accomodation[df_accomodation$AccommodationType == #
+	"Employer provided accomodation", "AccommodationType"] <- #
+	"Employer provided accommodation"#
+#
+# calculate a column#
+df_accomodation$LOS_Group <- fn_calc_los(df_accomodation$NoNights)#
+# (2.2) PROCESS df_trips#
+# delete uneeded columns & include only "Overnight trips" (nrow = 90693)#
+df_trips_overnight <- df_trips %>% filter(TripType == "Overnight Trip") %>% #
+		select(c(TripIDNumber,TripType, TripYear,#
+		TripQtr, DestinationRTO, RespondentWeight, SmoothedTripWeight)) #
+#
+# clean up some columns#
+df_trips_overnight[is.na(df_trips_overnight$RespondentWeight), "RespondentWeight"] <- 0#
+df_trips_overnight[is.na(df_trips_overnight$SmoothedTripWeight), "SmoothedTripWeight"] <- 0#
+df_trips_overnight[df_trips_overnight$DestinationRTO == "Other   ", "DestinationRTO"] <- "Other"#
+# clean up#
+rm(df_trips, fn_calc_los)#
+# (3) CREATE a data frame of complete years. #
+# add 4 extra columns. These will be used in group by calculations (nrow = 90693)#
+df_trips_overnight <- fn_create_year_end(df_trips_overnight)#
+#
+# (3.1) create four data frames with unique year ending values#
+df_YE_Mar <- df_trips_overnight  %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
+df_YE_Jun <- df_trips_overnight  %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
+df_YE_Sep <- df_trips_overnight  %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
+df_YE_Dec <- df_trips_overnight  %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
+#
+# (3.2) stack the four data frames; include whole year values; select a single column#
+df_YE_all <- bind_rows(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec) %>%#
+			group_by(YE) %>% summarise(count = n()) %>% #
+			filter(count == 4) %>% select(YE)#
+# clean up			#
+rm(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec)#
+# (4) COMBINE two data frames into one#
+# combine the two data frames into one, do some renaming, grouping and aggregating#
+df_combined <- df_trips_overnight %>% #
+	inner_join(df_accomodation, by = c("TripIDNumber"  = "TripID")) %>% #
+	mutate(TotalNights = NoNights * SmoothedTripWeight, TotalRespondents = 1) %>%#
+	rename(TotalVisitors = RespondentWeight, TotalTrips = SmoothedTripWeight) %>%#
+	select(YEDec, YESep, YEJun, YEMar,  LOS_Group, DestinationRTO, #
+		AccommodationType, TotalVisitors, TotalTrips, TotalNights, TotalRespondents) %>%#
+	group_by(YEDec, YESep, YEJun, YEMar, LOS_Group, DestinationRTO, AccommodationType ) %>%#
+	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), #
+		TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents))#
+# clean up#
+rm(df_accomodation, df_trips_overnight)#
+# (5) CREATE Year Ending aggregates and filter to include full ears#
+# create a vector of 4 different columns stacked on top of each other#
+YE <- c(df_combined$YEDec, df_combined$YESep, df_combined$YEJun, df_combined$YEMar)#
+#
+# duplicate the same data frame 4 time and stack on top of each other (158188 rows)#
+df_four_quarters <- rbind(df_combined, df_combined, df_combined, df_combined)#
+#
+# combine the previously created vector with the stacked data frames #
+# unfiltered is 93734 rows, filtered is 86511 rows#
+df_base_aggregates <- cbind(YE, df_four_quarters) %>%#
+	select(-c(YEDec, YESep, YEJun, YEMar))  %>%#
+	group_by(YE, LOS_Group, DestinationRTO, AccommodationType) %>%#
+	summarise(Total_Visitors = sum(TotalVisitors), Total_Trips = sum(TotalTrips), #
+	Total_Nights = sum(TotalNights), Total_Respondents = sum(TotalRespondents)) %>%  #
+	filter(YE %in% df_YE_all$YE)#
+#
+# Following are reconciliations checks. To be commented in / out#
+# options(digits = 22)#
+# df_base_aggregates %>% ungroup() %>% #
+#	summarise (Total_Visitors =  sum(Total_Visitors), Total_Trips = sum(Total_Trips), #
+#	Total_Nights = sum(Total_Nights), Total_Respondents = sum(Total_Respondents))#
+# clean up#
+rm(df_combined, df_four_quarters, df_YE_all, YE)#
+# (6) CREATE various aggregate combinations#
+# PREAMBLE for  (6)#
+# There are four dimenions columns. The total number of group_by combinations of these are:#
+# 2^4 = 16.  1 of these has been previously created (see 'df_base_aggregates' )...#
+# the remaining 15 combinations are created below.  Of these 15 combinations, 14 are created#
+# programmatically (see 6.5). The remaining combination is created as a single line of code (see 6.6)#
+#
+# (6.1) get the dimenions names#
+vct_dim_names <- names(df_base_aggregates)[1:4]#
+#
+# (6.2) create a "summarise" clause (for multiple use later)#
+lst_aggregations <- list("sum(Total_Visitors)", "sum(Total_Trips)", #
+	"sum(Total_Nights)", "sum(Total_Respondents)")#
+#
+agg_names <- c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents")#
+#
+lst_sum_clause <- setNames(lst_aggregations, agg_names)#
+#
+# (6.3) sort order of the columns#
+vct_col_sort <- c(vct_dim_names, agg_names)#
+#
+# (6.4) There are four columns resulting in 2^4 = 16 combinations...#
+# we now create 14 of these combinations#
+lst_combinations <- fn_create_column_combinations(vct_dim_names)#
+#
+# (6.5) Create a list of data frames Each list element is a data frame#
+# based on a column combination created in 6.4#
+lst_aggregations <- lapply(lst_combinations, function(x) #
+	fn_create_comb_aggregates(df_base_aggregates, x, lst_sum_clause))#
+#
+# (6.5.1) combine the list of data frames into a single data frame#
+df.aggregations <- do.call(bind_rows, lst_aggregations)#
+#
+# (6.6) grand totals#
+df_totals <- df_base_aggregates %>% ungroup() %>% #
+				summarise_(.dots = lst_sum_clause) %>% #
+				fn_create_df_with_all(vct_dim_names, vct_col_sort)#
+# clean up#
+rm(fn_create_column_combinations, fn_create_comb_aggregates, fn_create_df_with_all)#
+rm(fn_create_year_end, lst_aggregations, lst_sum_clause, vct_col_sort)#
+#
+# (7) combine all aggregates into a single data frame#
+# total rows = 86511 + 71114 + 1 = 157626#
+df_consolidated <- bind_rows(df_base_aggregates, df.aggregations, df_totals)#
+# (7.1) convert numeric columns to text with 0 decimal places#
+df_fin <- sapply(df_consolidated[, agg_names], function(x) fn_convert_to_text(x)) %>%#
+ 			# convert sapply's matrix to a data frame#
+ 			as.data.frame() %>%#
+ 			# club the original columns together with the new text columns#
+ 			bind_cols(df_consolidated[, vct_dim_names, ], .)#
+#
+#clean up#
+rm(df_base_aggregates, df_totals, df.aggregations, lst_combinations)#
+rm(agg_names, fn_convert_to_text, vct_dim_names)#
+# (8) LOOKUPS#
+# (8.1) import lookup tables and create lookup for year end#
+df_lu_acccom_type <- read.csv("outputs/DimenLookupAccommodationTypeAccommodation.csv", header = TRUE)#
+df_lu_dest_rto <- read.csv("outputs/DimenLookupDestinationRTOAccommodation.csv", header = TRUE)#
+df_lu_LOS <- read.csv("outputs/DimenLookupLOS_groupAccommodation.csv", header = TRUE)#
+df_lu_YE <- fn_create_YE_lookup(df_fin$YE)#
+#
+# (8.2) based on the lookup tables created, replace string values with numeric lookups for the...#
+# 4 dimensions#
+df_fin_lu <- df_fin %>% #
+			inner_join(df_lu_LOS, by = c("LOS_Group" = "Description")) %>% #
+			mutate(LOS_Group = Code) %>% #
+			select(-c(Code, SortOrder)) %>% #
+			inner_join(df_lu_dest_rto, by = c("DestinationRTO" = "Description")) %>% #
+			mutate(DestinationRTO = Code) %>% #
+			select(-c(Code, SortOrder)) %>%#
+			inner_join(df_lu_acccom_type, by = c("AccommodationType" = "Description")) %>% #
+			mutate(AccommodationType = Code) %>% #
+			select(-c(Code, SortOrder)) %>%#
+ 			inner_join(df_lu_YE, by = c("YE" = "YE")) %>% #
+			mutate(YE = Code) %>% #
+			select(-c(Code, SortOrder, Description)) %>%#
+			rename(Year_ending = YE)#
+#
+# clean up#
+rm(df_consolidated, fn_create_YE_lookup)#
+#
+# WORKOUT  Parent / Child
+head(df_fin_lu)
+nrow(df_fin_lu)
