@@ -7,6 +7,9 @@ library(dplyr)
 library(stringr)
 
 options(stringsAsFactors = FALSE)
+# do not display in scientific notation
+options(scipen=999, digits = 10)
+
 setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')
 
 # calculates "length of stay"
@@ -23,6 +26,8 @@ source('functions/fn_create_year_end.R')
 source('functions/fn_convert_to_text.R')
 # creates  yearend lookup table
 source('functions/fn_create_YE_lookup.R')
+# takes a dimension lookup and creates a dimension hierarchy
+source('functions/fn_create_dim_hierarchy.R')
 
 
 
@@ -89,6 +94,8 @@ df_YE_Jun <- df_trips_overnight  %>% select(TripQtr, YEJun) %>% distinct() %>% r
 df_YE_Sep <- df_trips_overnight  %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)
 df_YE_Dec <- df_trips_overnight  %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)
 
+
+
 # (3.2) stack the four data frames; include whole year values; select a single column
 df_YE_all <- bind_rows(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec) %>%
 			group_by(YE) %>% summarise(count = n()) %>% 
@@ -109,6 +116,13 @@ df_combined <- df_trips_overnight %>%
 	group_by(YEDec, YESep, YEJun, YEMar, LOS_Group, DestinationRTO, AccommodationType ) %>%
 	summarise(TotalVisitors = sum(TotalVisitors), TotalTrips = sum(TotalTrips), 
 		TotalNights = sum(TotalNights), TotalRespondents = sum(TotalRespondents))
+
+# RECONCILIATION POINT - Uncomment the following to reconcile againt source SAS report:
+# P:\OTSP\SAS\DTS\Output\2010Q3\reports\Est_Qtr_Nights_Accom_Type.xls [ total  = 8,509,478 ]
+# df_combined %>% filter(TripYear == 2010 & TripQtr ==3) %>% summarise(nights = sum(TotalNights))
+
+
+
 # clean up
 rm(df_accomodation, df_trips_overnight)
 
@@ -130,12 +144,15 @@ df_base_aggregates <- cbind(YE, df_four_quarters) %>%
 	Total_Nights = sum(TotalNights), Total_Respondents = sum(TotalRespondents)) %>%  
 	filter(YE %in% df_YE_all$YE)
 
-# Following are reconciliations checks. To be commented in / out
-# options(digits = 22)
-# df_base_aggregates %>% ungroup() %>% 
-#	summarise (Total_Visitors =  sum(Total_Visitors), Total_Trips = sum(Total_Trips), 
-#	Total_Nights = sum(Total_Nights), Total_Respondents = sum(Total_Respondents))
 
+
+# RECONCILIATION POINT - Uncomment the following to reconcile againt source SAS reports:
+# P:\OTSP\SAS\DTS\Output\2010Q1\reports\Est_Qtr_Nights_Accom_Type.xls [ total  = 18160387 ]
+# P:\OTSP\SAS\DTS\Output\2010Q2\reports\Est_Qtr_Nights_Accom_Type.xls [ total  = 10389425 ]
+# P:\OTSP\SAS\DTS\Output\2010Q3\reports\Est_Qtr_Nights_Accom_Type.xls [ total  = 8509478 ]
+# P:\OTSP\SAS\DTS\Output\2010Q4\reports\Est_Qtr_Nights_Accom_Type.xls [ total  = 10362275 ]
+# expecting total of 47421565 [Sum of the 4 totals above]
+# df_base_aggregates %>% ungroup() %>% filter(YE == "YEDec2010") %>% summarise(nights = sum(Total_Nights))
 
 
 # clean up
@@ -150,19 +167,24 @@ rm(df_combined, df_four_quarters, df_YE_all, YE)
 # the remaining 15 combinations are created below.  Of these 15 combinations, 14 are created
 # programmatically (see 6.5). The remaining combination is created as a single line of code (see 6.6)
 
+
 # (6.1) get the dimenions names
-vct_dim_names <- names(df_base_aggregates)[1:4]
+vct_dim_names <- c("YE", "LOS_Group", "Destination_RTO", "Accomodation_Type")
+
+names(df_base_aggregates)[1:4] <- vct_dim_names
+
+
 
 # (6.2) create a "summarise" clause (for multiple use later)
 lst_aggregations <- list("sum(Total_Visitors)", "sum(Total_Trips)", 
 	"sum(Total_Nights)", "sum(Total_Respondents)")
 
-agg_names <- c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents")
+vct_measure_names <- c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents")
 
-lst_sum_clause <- setNames(lst_aggregations, agg_names)
+lst_sum_clause <- setNames(lst_aggregations, vct_measure_names)
 
 # (6.3) sort order of the columns
-vct_col_sort <- c(vct_dim_names, agg_names)
+vct_col_sort <- c(vct_dim_names, vct_measure_names)
 
 # (6.4) There are four columns resulting in 2^4 = 16 combinations...
 # we now create 14 of these combinations
@@ -174,7 +196,7 @@ lst_aggregations <- lapply(lst_combinations, function(x)
 	fn_create_comb_aggregates(df_base_aggregates, x, lst_sum_clause))
 
 # (6.5.1) combine the list of data frames into a single data frame
-df.aggregations <- do.call(bind_rows, lst_aggregations)
+df_aggregations <- do.call(bind_rows, lst_aggregations)
 
 # (6.6) grand totals
 df_totals <- df_base_aggregates %>% ungroup() %>% 
@@ -186,27 +208,33 @@ rm(fn_create_year_end, lst_aggregations, lst_sum_clause, vct_col_sort)
 
 # (7) combine all aggregates into a single data frame
 # total rows = 86511 + 71114 + 1 = 157626
-df_consolidated <- bind_rows(df_base_aggregates, df.aggregations, df_totals)
+df_consolidated <- bind_rows(df_base_aggregates, df_aggregations, df_totals)
+
+# RECONCILIATION POINT - reconcile df_aggregations to 47421565 for "YEDec2010" [see above]
+# df_aggregations %>% filter(YE == "YEDec2010" & LOS_Group == "All" 
+# & DestinationRTO == "All" & AccommodationType == "All")
+
 
 
 # (7.1) convert numeric columns to text with 0 decimal places
-df_fin <- sapply(df_consolidated[, agg_names], function(x) fn_convert_to_text(x)) %>%
+df_fin <- sapply(df_consolidated[, vct_measure_names], function(x) fn_convert_to_text(x)) %>%
  			# convert sapply's matrix to a data frame
  			as.data.frame() %>%
  			# club the original columns together with the new text columns
  			bind_cols(df_consolidated[, vct_dim_names, ], .)
 
 #clean up
-rm(df_base_aggregates, df_totals, df.aggregations, lst_combinations)
-rm(agg_names, fn_convert_to_text, vct_dim_names)
+rm(df_base_aggregates, df_totals, df_aggregations, lst_combinations)
+rm(fn_convert_to_text)
 
 
 # (8) LOOKUPS
 # (8.1) import lookup tables and create lookup for year end
-df_lu_acccom_type <- read.csv("outputs/DimenLookupAccommodationTypeAccommodation.csv", header = TRUE)
-df_lu_dest_rto <- read.csv("outputs/DimenLookupDestinationRTOAccommodation.csv", header = TRUE)
-df_lu_LOS <- read.csv("outputs/DimenLookupLOS_groupAccommodation.csv", header = TRUE)
-df_lu_YE <- fn_create_YE_lookup(df_fin$YE)
+df_lu_acccom_type <- read.csv("inputs/DimenLookupAccommodationTypeAccommodation.csv", header = TRUE)
+df_lu_dest_rto <- read.csv("inputs/DimenLookupDestinationRTOAccommodation.csv", header = TRUE)
+df_lu_LOS <- read.csv("inputs/DimenLookupLOS_groupAccommodation.csv", header = TRUE)
+
+df_lu_YE <- fn_create_YE_lookup(df_fin$YE) %>% as.data.frame()
 
 # (8.2) based on the lookup tables created, replace string values with numeric lookups for the...
 # 4 dimensions
@@ -215,24 +243,67 @@ df_fin_lu <- df_fin %>%
 			mutate(LOS_Group = Code) %>% 
 			select(-c(Code, SortOrder)) %>% 
 		
-			inner_join(df_lu_dest_rto, by = c("DestinationRTO" = "Description")) %>% 
+			inner_join(df_lu_dest_rto, by = c("Destination_RTO" = "Description")) %>% 
 			mutate(DestinationRTO = Code) %>% 
 			select(-c(Code, SortOrder)) %>%
 		
-			inner_join(df_lu_acccom_type, by = c("AccommodationType" = "Description")) %>% 
-			mutate(AccommodationType = Code) %>% 
+			inner_join(df_lu_acccom_type, by = c("Accomodation_Type" = "Description")) %>% 
+			mutate(Accommodation_Type = Code) %>% 
 			select(-c(Code, SortOrder)) %>%
  		
  			inner_join(df_lu_YE, by = c("YE" = "YE")) %>% 
 			mutate(YE = Code) %>% 
-			select(-c(Code, SortOrder, Description)) %>%
+			select(-c(Code, SortOrder, Description)) %>%   
 		
-			rename(Year_ending = YE)
+			rename(Year_ending = YE) %>%
+			as.data.frame()
+			
+			
+# (8.3) create dimension hierarchy from dimension lookups in 8.1
+df_dh_acccom_type <- fn_create_dim_hierarchy(df_lu_acccom_type)
+df_dh_dest_rto <- fn_create_dim_hierarchy(df_lu_dest_rto)
+df_dh_LOS <- fn_create_dim_hierarchy(df_lu_LOS)
+df_dh_YE <- fn_create_dim_hierarchy(df_lu_YE)
+
+# (8.4.a) create Dimension and Measure Index df's
+
+
+vct_dim_names
+vct_measure_names
+
+
+
 
 # clean up
 rm(df_consolidated, fn_create_YE_lookup)
 
+
+
+# SUMMARY OF OUTPUT TABLES:
+#1	Data
+# example "data7571"
+
+#2	Dimension lookups (one per dimension - mapping of dimension code to dimension value) 
+# example = "DimenLookupAgeRange7571"
+
+#3  Dimension hierarchy (maps total to details) (one per dimension)
+# example = "DimenHierarchyAgeRange7571"
+
+#4  MeasureIndex (MeasureCode and Measure Title) Eg 4 rows. "Total Visitors", "Total_Visitors"
+# example = "MeasureIndex"
+
+#5  DimensionIndex (DimensionCode, DimensionTitle)
+# example = "DimensionIndex"
+
+#5  FileIndex ???
+
+
+
+
+
 # WORKOUT  Parent / Child
+# get "df_lu_YE" in the correct format.
+
 
 
 
