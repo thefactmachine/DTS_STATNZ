@@ -1,2 +1,4 @@
 data/
 workings/
+output_reports/
+.RData
