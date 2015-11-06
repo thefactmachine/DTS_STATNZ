@@ -1,0 +1,27 @@
+Trip Purpose Code,Trip Purpose Description,Trip Purpose Group Code,"Trip Purpose Group Description
+(Trip Outliers)",Business Group Code,Business Group Description,Trip Purpose Group Code,"Trip Purpose Group Description
+(Estimation)"
+111,Holiday,P1,Holiday,B2,Non Business,P1,Holiday
+112,Sightseeing,P1,Holiday,B2,Non Business,P1,Holiday
+113,Skiing,P1,Holiday,B2,Non Business,P1,Holiday
+114,Honeymoon,P1,Holiday,B2,Non Business,P1,Holiday
+115,Publicised Special Event,P1,Holiday,B2,Non Business,P1,Holiday
+116,Incentive Visit as a Reward for Good Work or Sales,P1,Holiday,B2,Non Business,P1,Holiday
+117,Recreation,P1,Holiday,B2,Non Business,P1,Holiday
+118,Participation in Sports Activity,P1,Holiday,B2,Non Business,P1,Holiday
+211,Visiting friends,P2,Visiting Friends or Relatives,B2,Non Business,P2,Visiting Friends or Relatives
+212,Visiting Relatives,P2,Visiting Friends or Relatives,B2,Non Business,P2,Visiting Friends or Relatives
+213,Attending Wedding/Family Occasion/Funerals,P2,Visiting Friends or Relatives,B2,Non Business,P2,Visiting Friends or Relatives
+214,Care of Invalids/Friends/Family Members,P2,Visiting Friends or Relatives,B2,Non Business,P2,Visiting Friends or Relatives
+311,Business,P3,Business,B1,Business,P3,Business
+312,Conference or Convention,P3,Business,B1,Business,P3,Business
+313,Participation in Professional Sports Activities,P3,Business,B1,Business,P3,Business
+314,Personal Business,P3,Business,B1,Business,P3,Business
+411,Education/Study,P4,Other,B2,Non Business,P4,Education
+511,Hospital/Medical Treatment,P4,Other,B2,Non Business,P96,Other
+512,Health Treatment,P4,Other,B2,Non Business,P96,Other
+811,Working Holiday,P4,Other,B2,Non Business,P96,Other
+996,Other,P4,Other,B2,Non Business,P96,Other
+998,Refused,P4,Other,B2,Non Business,P96,Other
+999,Dont know,P4,Other,B2,Non Business,P96,Other
+0,None,P4,Other,B2,Non Business,P96,Other
