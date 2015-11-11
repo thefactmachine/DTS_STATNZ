@@ -418,7 +418,7 @@ sub_path_to_output <- paste0("outputs", "/", df_file_index$TableID)
 curr_path <- getwd()
 str_full_path <- file.path(curr_path, sub_path_to_output)
 
-# if the file path does not exist then create it
+# if the file path does not exist then create it                            
 if (!file.exists(str_full_path)) dir.create(str_full_path)
 
 #....and finally write the entire list to a set of csv files.
