@@ -29,7 +29,10 @@ source('functions/fn_convert_to_text.R')
 source('functions/fn_create_YE_lookup.R')
 # takes a dimension lookup and creates a dimension hierarchy
 source('functions/fn_create_dim_hierarchy.R')
-
+# this is a collection of statements that changes a few values so it can join with "df_purpose_lu"
+source('functions/fn_clean_trips.R')
+# this function cleans up "vw_DTSTripSpend.csv" It removes "alcohol" from "Food and Alcohol"
+source('functions/fn_clean_spend.R')
 
 
 
@@ -63,371 +66,65 @@ df_purpose_lu <- read.csv("inputs/POV_to_POV_Group.csv", header = TRUE) %>%
 		"POV_Group" = "Trip.Purpose.Group.Description..Estimation.") %>%
 		select(POV, POV_Group)
 
-
 # RELATIONSHIP BETWEEN TRIPS AND TRIP_SPEND
 # trips has 137081 rows trip_spend contains six different categories. Each of these categories
 # has 137081 rows.  The number of rows in trip_spend is 6 * 137081 = 822486
 
-
-
-
-
-
-df_trip_spend <- read.csv("data/vw_DTSTripSpend.csv" , header = TRUE) %>% 
-			filter(is.na(TripID) != TRUE)
-
-df_trip_spend[df_trip_spend$SpendType == "Other   ", "SpendType"] <- "Other"			
-			
-df_trips <- df_trips %>% 
-			select(TripIDNumber, TripYear, TripQtr, TripType, 
-				DestinationRTO, POV, ExpenditureWeight, ImputedSpendAccom, ImputedSpendTrnsport)			
-
-df_trips[is.na(df_trips$ImputedSpendAccom),"ImputedSpendAccom"] <- 0
-df_trips[is.na(df_trips$ExpenditureWeight), "ExpenditureWeight"] <- 0
-
-			
-df_trips <- df_trips %>% 
-			mutate(Accom_Spend = ExpenditureWeight * ImputedSpendAccom) %>%
-			mutate(Trans_Spend = ExpenditureWeight * ImputedSpendTrnsport)
-
-
-
 #========================================================================
-# RECONCILE Accomodation spend and Transportation Spend
-
-# This matches 239,533,444
-df_trips %>%  filter(TripYear == 2010 & TripQtr == 3 ) %>%
-			summarise(total = sum(Accom_Spend))
-
-
-
-# This matches 230,141,190 (day trip) + 372,306,320 (overnight trip) = 602,447,510 
-df_trips %>%  filter(TripYear == 2010 & TripQtr == 3 ) %>%
-			summarise(total = sum(Trans_Spend))
-
-
+# Prepare "Trips" and "TripSpend" data
 #========================================================================
-
-# nrow() here is 822486 (6 * 137081)
-df_trip_spend_calc <- df_trips[, c("TripIDNumber", "ExpenditureWeight")] %>% 
-		inner_join(df_trip_spend, by = c("TripIDNumber" = "TripID")) %>% 
-		mutate(Expenditure = ExpenditureWeight * ImputedSpendAmt) %>%
-		select(TripIDNumber, SpendType, Expenditure)
-		
-		
-
-total_alcohol <- sum(df_trip_spend_calc[df_trip_spend_calc$SpendType == "Alcohol", "Expenditure"])
-sum(df_trip_spend_calc$Expenditure) - total_alcohol
-
-# remove "alcohol" from "food and alcohol" and c it "FoodAndBeverages"
-# nrows = 2 * 137081 = 274162
-df_alcohol_beverage <- df_trip_spend_calc %>% 
-						filter(SpendType == "Alcohol" | SpendType == "Food And Alcohol") %>% 
-						spread(SpendType, Expenditure) %>%
-						select(TripIDNumber, Alcohol, FoodAndAlcohol = one_of("Food And Alcohol")) %>%
-						mutate(FoodAndBeverages = FoodAndAlcohol - Alcohol) %>%
-						select(-FoodAndAlcohol) %>% 
-						gather("SpendType", "Expenditure", 2:3)
-
-
-	
-bb <- df_trip_spend_calc %>% 
-		filter(!SpendType %in% c("Alcohol", "Food And Alcohol")) %>%
-		bind_rows(df_alcohol_beverage)
-
-
-
-
-
-
-#1) Join trips and trip_spend 
-# 2) calculate spend_amount
-# 3) get rid of suplurfould columns
-# 4) # create food and beverages (Excluding alcohol) 
-# 5) Replace the old F&B with the new F&B
-
-
-
-# 6) add accomodation_spend and transport_spend to spend table
-
-# 7) This should result in 8 categories.  1096648 / 8 = 137081
-# 8) Accomodation spend will be zero for day trips. #Day trips = 46388 onight trips = 90693
-
-
-
-
-
-
-
-
-# clean up a columns			
-df_trip_spend[df_trip_spend$SpendType == "Other   ", "SpendType"] <- "Other"
-			
-
-
-al <- inner_join(df_trips, df_trip_spend, by = c("TripIDNumber" = "TripID")) %>% 
-				mutate(Expenditure = ImputedSpendAmt * ExpenditureWeight) %>% 
-				filter(TripYear == 2010 & TripQtr == 3 )  %>% 
-				filter(SpendType == "Alcohol" &  TripType == "Day Trip") 
-				
-				
-fa <- inner_join(df_trips, df_trip_spend, by = c("TripIDNumber" = "TripID")) %>% 
-				mutate(Expenditure = ImputedSpendAmt * ExpenditureWeight) %>% 
-				filter(TripYear == 2010 & TripQtr == 3 )  %>% 
-				filter(SpendType == "Food And Alcohol" &  TripType == "Day Trip") 
-				
-
-
-
-
-
-
-
-
-
-			
-# RECONCILE WITH Days TRIPS ALCOHOL			
-inner_join(df_trips, df_trip_spend, by = c("TripIDNumber" = "TripID")) %>% 
-				mutate(Expenditure = ImputedSpendAmt * ExpenditureWeight) %>% 
-				filter(TripYear == 2010 & TripQtr == 3 )  %>% 
-				filter(SpendType == "Alcohol" &  TripType == "Day Trip") %>% 
-				summarise(total = sum(Expenditure)) %>% 
-				mutate(total = formatC(round(total,0), format="fg", big.mark = ","))
-
-inner_join(df_trips, df_trip_spend, by = c("TripIDNumber" = "TripID")) %>% 
-				mutate(Expenditure = ImputedSpendAmt * ExpenditureWeight) %>% 
-				filter(TripYear == 2010 & TripQtr == 3 )  %>% 
-				filter(SpendType == "Food And Alcohol" &  TripType == "Day Trip") %>% 
-				summarise(total = sum(Expenditure)) %>%
-				mutate(total = formatC(round(total,0), format="fg", big.mark = ","))
-
-
-				
-inner_join(df_trips, df_trip_spend, by = c("TripIDNumber" = "TripID")) %>% 
-				mutate(Expenditure = ImputedSpendAmt * ExpenditureWeight) %>% 
-				filter(TripYear == 2010 & TripQtr == 3 )  %>% 
-				filter(SpendType == "Gambling" &  TripType == "Day Trip") %>% 
-				summarise(total = sum(Expenditure)) %>%
-				mutate(total = formatC(round(total,0), format="fg", big.mark = ","))
-
-
-inner_join(df_trips, df_trip_spend, by = c("TripIDNumber" = "TripID")) %>% 
-				mutate(Expenditure = ImputedSpendAmt * ExpenditureWeight) %>% 
-				filter(TripYear == 2010 & TripQtr == 3 )  %>% 
-				filter(SpendType == "Gifts" &  TripType == "Day Trip") %>% 
-				summarise(total = sum(Expenditure)) %>%
-				mutate(total = formatC(round(total,0), format="fg", big.mark = ","))
-
-
-inner_join(df_trips, df_trip_spend, by = c("TripIDNumber" = "TripID")) %>% 
-				mutate(Expenditure = ImputedSpendAmt * ExpenditureWeight) %>% 
-				filter(TripYear == 2010 & TripQtr == 3 )  %>% 
-				filter(SpendType == "Other" &  TripType == "Day Trip") %>% 
-				summarise(total = sum(Expenditure)) %>%
-				mutate(total = formatC(round(total,0), format="fg", big.mark = ","))
-
-inner_join(df_trips, df_trip_spend, by = c("TripIDNumber" = "TripID")) %>% 
-				mutate(Expenditure = ImputedSpendAmt * ExpenditureWeight) %>% 
-				filter(TripYear == 2010 & TripQtr == 3 )  %>% 
-				filter(SpendType == "Recreation" &  TripType == "Day Trip") %>% 
-				summarise(total = sum(Expenditure)) %>%
-				mutate(total = formatC(round(total,0), format="fg", big.mark = ","))
- 
-
-
-
-
-
-
-
-inner_join(df_trips, df_trip_spend, by = c("TripIDNumber" = "TripID")) %>% 
-				mutate(Expenditure = ImputedSpendAmt * ExpenditureWeight) %>% 
-				filter(TripYear == 2010 & TripQtr == 3 )  %>% 
-				filter(TripType == "Day Trip") %>% 
-				summarise(total = sum(Expenditure))
-
-
-
-
-
-
-write.table(aa, "test.csv", sep = ",", row.names = FALSE, quote = FALSE)
-
-
-
-
-# clean up some columns
-df_trips[is.na(df_trips$SmoothedTripWeight), "SmoothedTripWeight"] <- 0
-df_trips[is.na(df_trips$RespondentWeight), "RespondentWeight"] <- 0
-
-df_trips[df_trips$DestinationRTO == "Other   ", "DestinationRTO"] <- "Other"
-
-# the following aligns the purpose of visit (POV) values in df_trips to df_purpose_lu
-# this is required to join the two tables
-df_trips[is.na(df_trips$POV), "POV"] <- "None"
-df_trips[df_trips$POV == "REFUSED", "POV"] <- "Refused"
-df_trips[df_trips$POV == "Business   "  , "POV"] <- "Business"
-df_trips[df_trips$POV == "Other Reason (specify)"  , "POV"] <- "Other"
-df_trips[df_trips$POV == "Education Or Study"  , "POV"] <- "Education/Study"
-df_trips[df_trips$POV == "Conference Or Convention"  , "POV"] <- "Conference or Convention"
-
-df_trips[df_trips$POV == "Attending wedding/Family Occasion/Funeral"  , "POV"]  <- 
-	"Attending Wedding/Family Occasion/Funerals"
-
-df_trips[df_trips$POV == "Visiting relatives"  , "POV"] <- "Visiting Relatives"
-df_trips[df_trips$POV == "Participating in sports activity"  , "POV"]  <- 
-	"Participation in Sports Activity"
-
-df_trips[df_trips$POV == "Publicised special event"  , "POV"] <- "Publicised Special Event"
+df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)
+df_trips <- fn_clean_trips(df_trips)
 
 # ASSERT: df_purpose_lu$POV are all contained in df_trips$POV
 stopifnot(nrow(anti_join(df_purpose_lu, df_trips, by = c("POV" = "POV"))) == 0)
 
-
-# Select relevant columns in df_trips and include df_purpose_lu$POV_Group.  
-# nrow(df_trips) is 137,081
-df_trips <- df_trips %>% 
-			select(TripIDNumber, TripYear, TripQtr, TripType, SmoothedTripWeight, 
-				DestinationRTO, POV, RespondentWeight, ExpenditureWeight) %>%
-			inner_join(df_purpose_lu,  by = c("POV" = "POV"))
-
-
-
-
-
-# Original trip_spend was 918,110 nrows.  The number of NA's are 95,624 these correspond to the number of NULLS
-# in SQL server. The new number of rows are 822,486
 df_trip_spend <- read.csv("data/vw_DTSTripSpend.csv" , header = TRUE) %>% 
 			filter(is.na(TripID) != TRUE)
 
+# in the original "vw_DTSTripSpend.csv" data, SpendType has 6 levels. We now get
+# accomodation and transport from "vw_DTSTrips.csv" and create 2 additional levels.
+# also "alcohol" is taken out from "food and alcohol" to prevent double counting "alcohol"
+df_spend_combined <- fn_clean_spend(df_trip_spend, df_trips)
 
+# clean off unecessary columns from df_trips.
+df_trips <- df_trips %>% select(-ExpenditureWeight, -ImputedSpendAccom, 
+				-ImputedSpendTrnsport, -Accom_Spend, -Trans_Spend)
 
-
-# clean up a columns			
-df_trip_spend[df_trip_spend$SpendType == "Other   ", "SpendType"] <- "Other"
-
-
-
-df_trip_spend <- df_trip_spend %>% select(TripID, SpendType, ImputedSpendAmt, NonImputedSpendAmt)
-
-
-# join trip_spend with trips and create an expenditure column
-
-
-
-df_export <- df_trips %>% inner_join(df_trip_spend, by = c("TripIDNumber" = "TripID")) %>%
-						mutate(Expenditure = ExpenditureWeight * ImputedSpendAmt) %>%
-						filter(TripYear == 2010 & TripQtr == 3)
-						
-
-
-
-
-
-
-
-write.table(df_export, "test.csv", sep = ",", row.names = FALSE, quote = FALSE)
-						
-
-
-
-
-df_combined <- df_trips %>% inner_join(df_trip_spend, by = c("TripIDNumber" = "TripID")) %>%
-						mutate(Expenditure = ExpenditureWeight * ImputedSpendAmt) %>%
-						select(-ImputedSpendAmt, -ExpenditureWeight, -RespondentWeight, -SmoothedTripWeight)
-			
-
+#========================================================================
+# RECONCILIATION POINT 
 # RECONCILIATION POINT. The following code snippet should reconcile to 
 # # P:\OTSP\SAS\DTS\Output\2010Q3\reports\Est_Qtr_Expend_Type_Item_Purpose.xls
+# see also \workings\spend_reconciliation.xlsx for easier-to-read formated version of 
+# the original spreadsheet
+#========================================================================
+df_rec_2010_Q3 <- df_trips %>% 
+				inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber")) %>% 
+				filter(TripYear == 2010 & TripQtr == 3 ) %>%
+				group_by(TripType, SpendType, POV_Group)  %>%
+				summarise(total = sum(Expenditure)) %>%
+				mutate(totals = formatC(round(total,0), format="fg", big.mark = ",")) %>%
+				arrange(TripType, SpendType, POV_Group) %>% as.data.frame()
+# ASSERT Total Spend for 2010 Q3 is 1700540403
+stopifnot(as.integer(sum(df_rec_2010_Q3$total)) == 1700540403)
 
-# 	group_by(TripType, SpendType, POV_Group) %>%
+# now we know that our numbers have integrity, we can join the two tables together.
+# expecting 1050260 rows
 
+df_trips_combined 	<- df_trips %>% inner_join(df_spend_combined, 
+						by = c("TripIDNumber" = "TripIDNumber"))
 
-aa <- df_combined %>% filter(TripYear == 2010, TripQtr == 3) %>% 
-	group_by(TripType, POV_Group) %>%
-	summarise(total = sum(Expenditure)) %>%
-#	mutate(total = formatC(round(total,0), format="fg", big.mark = ",")) %>%
-#	filter(TripType == "Day Trip") %>%
-	as.data.frame
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# clean up some columns
-df_trips[is.na(df_trips$SmoothedTripWeight), "SmoothedTripWeight"] <- 0
-df_trips[is.na(df_trips$RespondentWeight), "RespondentWeight"] <- 0
-
-df_trips[df_trips$DestinationRTO == "Other   ", "DestinationRTO"] <- "Other"
-
-# the following aligns the purpose of visit (POV) values in df_trips to df_purpose_lu
-# this is required to join the two tables
-df_trips[is.na(df_trips$POV), "POV"] <- "None"
-df_trips[df_trips$POV == "REFUSED", "POV"] <- "Refused"
-df_trips[df_trips$POV == "Business   "  , "POV"] <- "Business"
-df_trips[df_trips$POV == "Other Reason (specify)"  , "POV"] <- "Other"
-df_trips[df_trips$POV == "Education Or Study"  , "POV"] <- "Education/Study"
-df_trips[df_trips$POV == "Conference Or Convention"  , "POV"] <- "Conference or Convention"
-
-df_trips[df_trips$POV == "Attending wedding/Family Occasion/Funeral"  , "POV"]  <- 
-	"Attending Wedding/Family Occasion/Funerals"
-
-df_trips[df_trips$POV == "Visiting relatives"  , "POV"] <- "Visiting Relatives"
-df_trips[df_trips$POV == "Participating in sports activity"  , "POV"]  <- 
-	"Participation in Sports Activity"
-
-df_trips[df_trips$POV == "Publicised special event"  , "POV"] <- "Publicised Special Event"
-	
-# ASSERT: df_purpose_lu$POV are all contained in df_trips$POV
-stopifnot(nrow(anti_join(df_purpose_lu, df_trips, by = c("POV" = "POV"))) == 0)
-
-
-# Select relevant columns in df_trips and include df_purpose_lu$POV_Group
-df_trips <- df_trips %>% 
-			select(TripYear, TripQtr, TripType, SmoothedTripWeight, 
-				DestinationRTO, POV, RespondentWeight) %>%
-			inner_join(df_purpose_lu,  by = c("POV" = "POV"))
-
-
-# RECONCILIATION POINT. The following code snippet should reconcile to 
-# # P:\OTSP\SAS\DTS\Output\2010Q3\reports\Est_Qtr_Trip_Type_Purpose.xls
- 
-# df_trips %>% filter(TripYear == 2010 & TripQtr == 3) %>% 
-#	group_by(TripType, POV_Group) %>% 
-#	summarise(total = sum(SmoothedTripWeight)) %>% 
-#	mutate(total = formatC(round(total,0), format="fg", big.mark = ","))
 
 #=============================================================================
 # (3) CREATE a data frame of complete years. 
 # add 4 extra columns: (YEMar, YEJun, YESep, YEDec) These will be used in group by calculations 
-df_trips <- fn_create_year_end(df_trips)
+df_trips_combined <- fn_create_year_end(df_trips_combined)
 
 # (3.1) create four data frames with unique year ending values
-df_YE_Mar <- df_trips  %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)
-df_YE_Jun <- df_trips  %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)
-df_YE_Sep <- df_trips  %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)
-df_YE_Dec <- df_trips  %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)
+df_YE_Mar <- df_trips_combined %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)
+df_YE_Jun <- df_trips_combined %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)
+df_YE_Sep <- df_trips_combined %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)
+df_YE_Dec <- df_trips_combined %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)
 
 
 # (3.2) stack the four data frames; include whole year values; select a single column
@@ -438,19 +135,16 @@ df_YE_all <- bind_rows(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec) %>%
 			filter(count == 4) %>% select(YE)
 # clean up			
 rm(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec)
+rm(df_purpose_lu, df_spend_combined, df_trip_spend, df_trips)
 
 #=============================================================================
 # (4) CALCULATE Quarterly aggregates and rename columns
 
-df_trips_qtrly <- df_trips %>% 
-	mutate(Total_Respondents = 1) %>%
-	rename(Total_Visitors = RespondentWeight, Total_Trips = SmoothedTripWeight, 
-		Destination_RTO = DestinationRTO, Trip_Type = TripType)  %>%
-	select(YEDec, YESep, YEJun, YEMar, Destination_RTO, Trip_Type, POV, POV_Group,
-		Total_Visitors, Total_Trips, Total_Respondents) %>%
-	group_by(YEDec, YESep, YEJun, YEMar, Destination_RTO, Trip_Type, POV, POV_Group) %>%
-	summarise(Total_Visitors = sum(Total_Visitors), Total_Trips = sum(Total_Trips), 
-		Total_Respondents = sum(Total_Respondents))
+df_trips_qtrly <- df_trips_combined %>%  
+	rename(Destination_RTO = DestinationRTO, Trip_Type = TripType, Spend_Type = SpendType) %>%
+	group_by(YEDec, YESep, YEJun, YEMar, Destination_RTO, Trip_Type, POV, POV_Group, Spend_Type) %>%
+	summarise(Expenditure = sum(Expenditure))
+
 
 #=============================================================================
 # (5)   CREATE Year Ending aggregates and filter to include full ears
@@ -462,25 +156,31 @@ df_four_quarters <- rbind(df_trips_qtrly, df_trips_qtrly, df_trips_qtrly, df_tri
 
 df_base_aggregates <- cbind(YE, df_four_quarters) %>%
 	select(-c(YEDec, YESep, YEJun, YEMar))  %>%
-	group_by(YE, Destination_RTO, Trip_Type, POV, POV_Group) %>%
-	summarise(Total_Visitors = sum(Total_Visitors), Total_Trips = sum(Total_Trips),
-			Total_Respondents = sum(Total_Respondents))  %>%  
+	group_by(YE, Destination_RTO, Trip_Type, POV, POV_Group, Trip_Type, Spend_Type) %>%
+	summarise(Expenditure = sum(Expenditure))  %>%  
 	filter(YE %in% df_YE_all$YE)
+#=============================================================================
 
+#=============================================================================
 # RECONCILIATION POINT. df_base_aggregates contains quarterly year ending values
 # this means that each row is the sum of 4 quarters.  To reconcile these, four source
 # files were aggregated. The four source files were:
-# P:\OTSP\SAS\DTS\Output\2009Q4\reports\Est_Qtr_Trip_Type_Purpose.xls
-# P:\OTSP\SAS\DTS\Output\2010Q1\reports\Est_Qtr_Trip_Type_Purpose.xls
-# P:\OTSP\SAS\DTS\Output\2010Q2\reports\Est_Qtr_Trip_Type_Purpose.xls
-# P:\OTSP\SAS\DTS\Output\2010Q3\reports\Est_Qtr_Trip_Type_Purpose.xls
-# Expected totals for day trips and overnight trips: 27,491,016 & 15,981,539 
+# P:\OTSP\SAS\DTS\Output\2009Q4\reports\Est_Qtr_Expend_Type_Item_Purpose.xls
+# P:\OTSP\SAS\DTS\Output\2010Q1\reports\Est_Qtr_Expend_Type_Item_Purpose.xls
+# P:\OTSP\SAS\DTS\Output\2010Q2\reports\Est_Qtr_Expend_Type_Item_Purpose.xls
+# P:\OTSP\SAS\DTS\Output\2010Q3\reports\Est_Qtr_Expend_Type_Item_Purpose.xls
+# These four quarterly reports have been manually consolidated here:
+# "/workings/spend_YE_2010_Q3/YE_2010_Q3_Consolidated.xlsx"
 
-# Uncomment the following to get the totals above
-# df_base_aggregates %>% ungroup() %>% filter(YE == "YESep2010") %>% 
-#	group_by(Trip_Type) %>% summarise(trips = sum(Total_Trips)) %>%
-#	mutate(trips = formatC(round(trips,0), format="fg", big.mark = ","))
+temp_a 	<- df_base_aggregates %>% filter(YE == "YESep2010") %>% 
+				group_by(Trip_Type) %>% summarise(total = sum(Expenditure)) %>%
+				mutate(totals = formatC(round(total,0), format="fg", big.mark = ","))
 
+
+temp_b <- df_base_aggregates %>% filter(YE == "YESep2010") %>% 
+				group_by(POV_Group) %>% summarise(total = sum(Expenditure)) %>%
+				mutate(totals = formatC(round(total,0), format="fg", big.mark = ","))				
+#=============================================================================
 #=============================================================================
 # (6) CREATE various aggregate combinations
 # PREAMBLE for  (6)
@@ -494,11 +194,10 @@ df_base_aggregates <- cbind(YE, df_four_quarters) %>%
 
 
 # (6.1) get the dimenions names
-vct_dim_names <- names(df_base_aggregates)[1:5]
+vct_dim_names <- names(df_base_aggregates)[1:6]
 
 # get measure names
-vct_measure_names <- names(df_base_aggregates)[6:8]
-
+vct_measure_names <- names(df_base_aggregates)[7]
 
 # (6.2) create a "summarise" clause (for multiple use later)
 lst_aggregations <- as.list(paste0("sum(", vct_measure_names,")"))
@@ -536,8 +235,6 @@ df_totals <- df_base_aggregates %>% ungroup() %>%
 # clean up
 rm(fn_create_column_combinations, fn_create_comb_aggregates, fn_create_df_with_all)
 rm(fn_create_year_end, lst_aggregations, lst_sum_clause, vct_col_sort)
-
-
 
 
 
