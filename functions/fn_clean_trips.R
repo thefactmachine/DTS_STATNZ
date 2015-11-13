@@ -16,7 +16,10 @@ fn_clean_trips <- function(a_df_trips, a_df_purpose_lu) {
 	a_df_trips[a_df_trips$POV == "Participating in sports activity"  , "POV"]  <- 
 								"Participation in Sports Activity"
 	a_df_trips[a_df_trips$POV == "Publicised special event"  , "POV"] <- "Publicised Special Event"
-	a_df_trips[is.na(a_df_trips$ImputedSpendAccom),"ImputedSpendAccom"] <- 0
+	
+	a_df_trips[is.na(a_df_trips$ImputedSpendAccom),"ImputedSpendAccom"]  <- 0
+	a_df_trips[is.na(a_df_trips$ImputedSpendTrnsport),"ImputedSpendTrnsport"] <- 0
+	
 	a_df_trips[is.na(a_df_trips$ExpenditureWeight), "ExpenditureWeight"] <- 0
 
 	# the following stuff adds in some computed columns, and then adds a POV_group
@@ -30,7 +33,8 @@ fn_clean_trips <- function(a_df_trips, a_df_purpose_lu) {
 			mutate(Accom_Spend = ExpenditureWeight * ImputedSpendAccom) %>%
 			mutate(Trans_Spend = ExpenditureWeight * ImputedSpendTrnsport)
 
-	a_df_trips  <- a_df_trips  %>% inner_join(df_purpose_lu, by = c("POV" = "POV"))		
+	# join with df_purpose_lu to create a POV group
+	a_df_trips  <- a_df_trips  %>% inner_join(a_df_purpose_lu, by = c("POV" = "POV"))		
 	return(a_df_trips)
 
 }
