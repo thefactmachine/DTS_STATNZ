@@ -440,7 +440,7 @@ df_lu_YE, df_dh_POV_Group, df_dh_POV, df_dh_Trip_Type, df_dh_dest_rto, df_dh_YE)
 
 
 data_name <- paste0("data", df_file_index$TableID)
-
+ 
 vct_dimension_names <- 
 	paste0("DimenLookup", df_dimension_index$DimensionCode, df_file_index$TableID)
 
@@ -472,7 +472,7 @@ rm(data_name, vct_dim_names, vct_hierarchy_names, vct_dimension_names,
 
 sub_path_to_output <- paste0("outputs", "/", df_file_index$TableID)
 curr_path <- getwd()
-str_full_path <- file.path(curr_path, sub_path_to_output)
+str_full_path <- file.path(curr_path, sub_path_to_output) 
 
 
 # if the file path does not exist then create it                            

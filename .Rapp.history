@@ -1,10 +1,3 @@
-?dev.off
-library(reshape2)
-library(gridExtra)
-knitr
-library(knitr)
-library(shinyapps)
-library(shiny)
 library(dplyr)
 library(tidyr)
 library(stringr)
@@ -100,56 +93,27 @@ x
 ?trim
 unlist(lapply(trims, function(trim) mean(x, trim = trim)))
 unlist(lapply(rcauchy(1000), function(trim) mean(x, trim = trim)))
-# clear everything#
+df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE)
+dir()
+setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')
+df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE)
+nrow(df_activities)
+df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)
+nrow(df_trips)
+str(df_trips)
+options(stringsAsFactors = FALSE)
 rm(list = ls())#
 #
 # load some libaries #
 #library(lubridate)#
 library(dplyr)#
 library(stringr)#
-library(tidyr)#
-#
+library(tidyr)
 options(stringsAsFactors = FALSE)#
 # do not display in scientific notation#
 options(scipen=999, digits = 10)#
 #
-setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
-#
-# calculates "length of stay"#
-#source('functions/fn_calc_los.R')#
-# creates a data.frame of column combinations for use in a group_by#
-source('functions/fn_create_column_combinations.R')#
-# uses column combinations to create various group_by#
-source('functions/fn_create_comb_aggregates.R')#
-# appends columns to a data.frame such that resultant df is always 8 columns wide#
-source('functions/fn_create_df_with_all.R')#
-# appends a data.frame with four columns#
-source('functions/fn_create_year_end.R')#
-# converts floating point number to text#
-source('functions/fn_convert_to_text.R')#
-# creates  yearend lookup table#
-source('functions/fn_create_YE_lookup.R')#
-# takes a dimension lookup and creates a dimension hierarchy#
-source('functions/fn_create_dim_hierarchy.R')#
-# PREAMBLE (data relationships)#
-# relationship between df_trips & df_accomodation: a person makes a trip and...#
-# stays in accomodation. When a person makes a day trip there is no need for..#
-# accomodation. Therefore only "Overnight trips" are included #
-# A single trip can have multiple accomodation values as a person..#
-# can stay in different hotels in the same or different locations#
-# the data is quarterly data#
-#
-# PLAN OF ATTACK#
-# 1) load two CSV files #
-# 2) process the two CVS files#
-# 3) create a data frame of complete years (where the number of quarters = 4)#
-# 4) combine the two data frames and aggregate by: #
-#		a) year end (4 quarterly year ends) and#
-#		b) four dimension variables#
-# 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
-# 6) create various aggregate combinations#
-# (1) LOAD data#
-# (1.1) load trips data (nrow = 137081)#
+setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')
 df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
 #
 # (1.2) load and clean purpose of visit look up table data. #
@@ -158,538 +122,59 @@ df_purpose_lu <- read.csv("inputs/POV_to_POV_Group.csv", header = TRUE) %>% #
 		rename_("POV" = "Trip.Purpose.Description", #
 		"POV_Group" = "Trip.Purpose.Group.Description..Estimation.") %>%#
 		select(POV, POV_Group)#
-# RELATIONSHIP BETWEEN TRIPS AND TRIP_SPEND#
-# trips has 137081 rows trip_spend contains six different categories. Each of these categories#
-# has 137081 rows.  The number of rows in trip_spend is 6 * 137081 = 822486#
-df_trip_spend <- read.csv("data/vw_DTSTripSpend.csv" , header = TRUE) %>% #
-			filter(is.na(TripID) != TRUE)#
-#
-df_trip_spend[df_trip_spend$SpendType == "Other   ", "SpendType"] <- "Other"			#
+df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE)
+str(df_trips)
 df_trips <- df_trips %>% #
-			select(TripIDNumber, TripYear, TripQtr, TripType, #
-				DestinationRTO, POV, ExpenditureWeight, ImputedSpendAccom, ImputedSpendTrnsport)			#
-#
-df_trips[is.na(df_trips$ImputedSpendAccom),"ImputedSpendAccom"] <- 0#
-df_trips[is.na(df_trips$ExpenditureWeight), "ExpenditureWeight"] <- 0#
-df_trips <- df_trips %>% #
-			mutate(Accom_Spend = ExpenditureWeight * ImputedSpendAccom) %>%#
-			mutate(Trans_Spend = ExpenditureWeight * ImputedSpendTrnsport)
-# nrow() here is 822486 (6 * 137081)#
-df_trip_spend_calc <- df_trips[, c("TripIDNumber", "ExpenditureWeight")] %>% #
-		inner_join(df_trip_spend, by = c("TripIDNumber" = "TripID")) %>% #
-		mutate(Expenditure = ExpenditureWeight * ImputedSpendAmt) %>%#
-		select(TripIDNumber, SpendType, Expenditure)#
-total_alcohol <- sum(df_trip_spend_calc[df_trip_spend_calc$SpendType == "Alcohol", "Expenditure"])#
-sum(df_trip_spend_calc$Expenditure) - total_alcohol#
-#
-# remove "alcohol" from "food and alcohol" and c it "FoodAndBeverages"#
-# nrows = 2 * 137081 = 274162#
-df_alcohol_beverage <- df_trip_spend_calc %>% #
-						filter(SpendType == "Alcohol" | SpendType == "Food And Alcohol") %>% #
-						spread(SpendType, Expenditure) %>%#
-						select(TripIDNumber, Alcohol, FoodAndAlcohol = one_of("Food And Alcohol")) %>%#
-						mutate(FoodAndBeverages = FoodAndAlcohol - Alcohol) %>%#
-						select(-FoodAndAlcohol) %>% #
-						gather("SpendType", "Expenditure", 2:3)#
-bb <- df_trip_spend_calc %>% #
-		filter(!SpendType %in% c("Alcohol", "Food And Alcohol")) %>%#
-		bind_rows(df_alcohol_beverage)
-nrow(bb)
+		select(TripIDNumber, TripYear, TripQtr, TripType, DestinationRTO, POV)
 head(df_trips)
-sum(df_trips[df_trips$TripType == "Overnight Trip", "Accom_Spend"])
-sum(df_trips[df_trips$TripType == "Day Trip", "Accom_Spend"])
-(sum(df_trips[df_trips$TripType == "Day Trip", "Accom_Spend"]) == 0)
-stopifnot(sum(df_trips[df_trips$TripType == "Day Trip", "Accom_Spend"]) == 0)
-head(bb)
-aa <- df_trips %>% filter(TripType == "Overnight Trip") %>% select(TripIDNumber, Accomodation = Accom_Spend)
-head(aa)
-aa <- df_trips %>% filter(TripType == "Overnight Trip") %>% select(TripIDNumber, Expenditure = Accom_Spend) %>% mutate(SpendType = "Accomodation")
-head(aa)
-aa <- df_trips %>% #
-		filter(TripType == "Overnight Trip") %>% #
-		select(TripIDNumber, Expenditure = Accom_Spend) #
-		%>% mutate(SpendType = "Accomodation") %>%#
-		select(TripIDNumber, SpendType, Expenditure)
-aa <- df_trips %>% #
-		filter(TripType == "Overnight Trip") %>% #
-		select(TripIDNumber, Expenditure = Accom_Spend) #
-		%>% mutate(SpendType = "Accomodation") %>%#
-		select(TripIDNumber, SpendType, Expenditure)
-aa <- df_trips %>% #
-		filter(TripType == "Overnight Trip") %>% #
-		select(TripIDNumber, Expenditure = Accom_Spend) #
-		%>% mutate(SpendType = "Accomodation") %>%#
-		select(TripIDNumber, SpendType, Expenditure)
-aa <- df_trips %>% #
-		filter(TripType == "Overnight Trip") %>% #
-		select(TripIDNumber, Expenditure = Accom_Spend) #
-		%>% mutate(SpendType = "Accomodation")
-aa <- df_trips %>% #
-		filter(TripType == "Overnight Trip")
-aa <- df_trips %>% #
-		filter(TripType == "Overnight Trip") %>% #
-		select(TripIDNumber, Expenditure = Accom_Spend) %>% #
-		%>% mutate(SpendType = "Accomodation") %>%#
-		select(TripIDNumber, SpendType, Expenditure)
-aa <- df_trips %>% #
-		filter(TripType == "Overnight Trip") %>% #
-		select(TripIDNumber, Expenditure = Accom_Spend) %>% #
-		%>% mutate(SpendType = "Accomodation")
-aa <- df_trips %>% #
-		filter(TripType == "Overnight Trip") %>% #
-		select(TripIDNumber, Expenditure = Accom_Spend)
-head(aa)
-aa <- df_trips %>% #
-		filter(TripType == "Overnight Trip") %>% #
-		select(TripIDNumber, Expenditure = Accom_Spend) %>% #
-		mutate(SpendType = "Accomodation")
-head(aa)
-aa <- df_trips %>% #
-		filter(TripType == "Overnight Trip") %>% #
-		select(TripIDNumber, Expenditure = Accom_Spend) %>% #
-		mutate(SpendType = "Accomodation") %>%#
-		select(TripIDNumber, SpendType, Expenditure)
-head(aa)
-df_spend_accomodation <- df_trips %>% #
-						filter(TripType == "Overnight Trip") %>% #
-						select(TripIDNumber, Expenditure = Accom_Spend) %>% #
-						mutate(SpendType = "Accomodation") %>%#
-						select(TripIDNumber, SpendType, Expenditure)
-nrow(df_spend_accomodation)
-head(df_trips)
-select(TripIDNumber, Expenditure = Trans_Spend) %>% #
-						mutate(SpendType = "Transport") %>%#
-						select(TripIDNumber, SpendType, Expenditure)
-df_spend_transport <- df_trips %>% #
-						select(TripIDNumber, Expenditure = Trans_Spend) %>% #
-						mutate(SpendType = "Transport")
-head(df_spend_transport)
-df_spend_transport <- df_trips %>% #
-						select(TripIDNumber, Expenditure = Trans_Spend) %>% #
-						mutate(SpendType = "Transport") %>%#
-						select(TripIDNumber, SpendType, Expenditure)
-nrow(df_spend_transport)
-(7 * 137,081) + (1 * 90693)
-(7 * 137081) + (1 * 90693)
-xx <- bind_rows(df_trip_spend_new, df_spend_accomodation, df_spend_transport)
-df_trip_spend_new 	<- df_trip_spend_calc %>% #
-					filter(!SpendType %in% c("Alcohol", "Food And Alcohol")) %>%#
-					bind_rows(df_alcohol_beverage)#
-ASSERT: There is zero accomodation spend for every "day trips"#
-stopifnot(sum(df_trips[df_trips$TripType == "Day Trip", "Accom_Spend"]) == 0)#
-#
-# there are 90693 rows (i.e overnight trips) with accomodation expense#
-df_spend_accomodation <- df_trips %>% #
-						filter(TripType == "Overnight Trip") %>% #
-						select(TripIDNumber, Expenditure = Accom_Spend) %>% #
-						mutate(SpendType = "Accomodation") %>%#
-						select(TripIDNumber, SpendType, Expenditure)#
-#
-# here are the full 137,081 rows for transport spend#
-df_spend_transport <- df_trips %>% #
-						select(TripIDNumber, Expenditure = Trans_Spend) %>% #
-						mutate(SpendType = "Transport") %>%#
-						select(TripIDNumber, SpendType, Expenditure)
-xx <- bind_rows(df_trip_spend_new, df_spend_accomodation, df_spend_transport)
-nrow(xx)
-# clear everything#
-rm(list = ls())#
-#
-# load some libaries #
-#library(lubridate)#
-library(dplyr)#
-library(stringr)#
-library(tidyr)#
-#
-options(stringsAsFactors = FALSE)#
-# do not display in scientific notation#
-options(scipen=999, digits = 10)#
-#
-setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
-#
-# calculates "length of stay"#
-#source('functions/fn_calc_los.R')#
-# creates a data.frame of column combinations for use in a group_by#
-source('functions/fn_create_column_combinations.R')#
-# uses column combinations to create various group_by#
-source('functions/fn_create_comb_aggregates.R')#
-# appends columns to a data.frame such that resultant df is always 8 columns wide#
-source('functions/fn_create_df_with_all.R')#
-# appends a data.frame with four columns#
-source('functions/fn_create_year_end.R')#
-# converts floating point number to text#
-source('functions/fn_convert_to_text.R')#
-# creates  yearend lookup table#
-source('functions/fn_create_YE_lookup.R')#
-# takes a dimension lookup and creates a dimension hierarchy#
-source('functions/fn_create_dim_hierarchy.R')#
-# PREAMBLE (data relationships)#
-# relationship between df_trips & df_accomodation: a person makes a trip and...#
-# stays in accomodation. When a person makes a day trip there is no need for..#
-# accomodation. Therefore only "Overnight trips" are included #
-# A single trip can have multiple accomodation values as a person..#
-# can stay in different hotels in the same or different locations#
-# the data is quarterly data#
-#
-# PLAN OF ATTACK#
-# 1) load two CSV files #
-# 2) process the two CVS files#
-# 3) create a data frame of complete years (where the number of quarters = 4)#
-# 4) combine the two data frames and aggregate by: #
-#		a) year end (4 quarterly year ends) and#
-#		b) four dimension variables#
-# 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
-# 6) create various aggregate combinations#
-# (1) LOAD data#
-# (1.1) load trips data (nrow = 137081)#
-df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
-#
-# (1.2) load and clean purpose of visit look up table data. #
-# file obtained from "p:\OTSP\SAS\DTS\Classifications\Purpose.xls"#
-df_purpose_lu <- read.csv("inputs/POV_to_POV_Group.csv", header = TRUE) %>% #
-		rename_("POV" = "Trip.Purpose.Description", #
-		"POV_Group" = "Trip.Purpose.Group.Description..Estimation.") %>%#
-		select(POV, POV_Group)#
-# RELATIONSHIP BETWEEN TRIPS AND TRIP_SPEND#
-# trips has 137081 rows trip_spend contains six different categories. Each of these categories#
-# has 137081 rows.  The number of rows in trip_spend is 6 * 137081 = 822486#
-# CORRECT Some values in trips.  This will enable a subsequent joint with "df_purpose_lu"#
-df_trips[df_trips$DestinationRTO == "Other   ", "DestinationRTO"] <- "Other"#
-#
-# the following aligns the purpose of visit (POV) values in df_trips to df_purpose_lu#
-# this is required to join the two tables#
-df_trips[is.na(df_trips$POV), "POV"] <- "None"#
-df_trips[df_trips$POV == "REFUSED", "POV"] <- "Refused"#
-df_trips[df_trips$POV == "Business   "  , "POV"] <- "Business"#
-df_trips[df_trips$POV == "Other Reason (specify)"  , "POV"] <- "Other"#
-df_trips[df_trips$POV == "Education Or Study"  , "POV"] <- "Education/Study"#
-df_trips[df_trips$POV == "Conference Or Convention"  , "POV"] <- "Conference or Convention"#
-df_trips[df_trips$POV == "Attending wedding/Family Occasion/Funeral"  , "POV"]  <- #
-	"Attending Wedding/Family Occasion/Funerals"#
-df_trips[df_trips$POV == "Visiting relatives"  , "POV"] <- "Visiting Relatives"#
-df_trips[df_trips$POV == "Participating in sports activity"  , "POV"]  <- #
-	"Participation in Sports Activity"#
-df_trips[df_trips$POV == "Publicised special event"  , "POV"] <- "Publicised Special Event"#
-df_trips[is.na(df_trips$ImputedSpendAccom),"ImputedSpendAccom"] <- 0#
-df_trips[is.na(df_trips$ExpenditureWeight), "ExpenditureWeight"] <- 0#
-df_trips <- df_trips %>% #
-			select(TripIDNumber, TripYear, TripQtr, TripType, #
-				DestinationRTO, POV, ExpenditureWeight, ImputedSpendAccom, ImputedSpendTrnsport)			#
-df_trips <- df_trips %>% #
-			mutate(Accom_Spend = ExpenditureWeight * ImputedSpendAccom) %>%#
-			mutate(Trans_Spend = ExpenditureWeight * ImputedSpendTrnsport)
-head(df_purpose_lu)
+head(df_activities)
+names(df_activities)
+df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE) %>%#
+			select(-AnswerNumber, -LegNumber)
+head(df_activities)
+unique(df_activities$Activities)
+length(unique(df_activities$Activities))
+nrow(df_activities)
 nrow(df_trips)
 head(df_trips)
-xx <- inner_join(df_trips, df_purpose_lu, by = c("POV" = "POV"))
-head(xx)
-nrow(xx)
-# Time to focus on df_trip_spend#
-#
-df_trip_spend <- read.csv("data/vw_DTSTripSpend.csv" , header = TRUE) %>% #
-			filter(is.na(TripID) != TRUE)#
-df_trip_spend[df_trip_spend$SpendType == "Other   ", "SpendType"] <- "Other"	#
-# nrow() here is 822486 (6 * 137081)#
-df_trip_spend_calc <- df_trips[, c("TripIDNumber", "ExpenditureWeight")] %>% #
-		inner_join(df_trip_spend, by = c("TripIDNumber" = "TripID")) %>% #
-		mutate(Expenditure = ExpenditureWeight * ImputedSpendAmt) %>%#
-		select(TripIDNumber, SpendType, Expenditure)#
-# remove "alcohol" from "food and alcohol" and call it "FoodAndBeverages"#
-# nrows = 2 * 137081 = 274162#
-df_alcohol_beverage <- df_trip_spend_calc %>% #
-						filter(SpendType == "Alcohol" | SpendType == "Food And Alcohol") %>% #
-						spread(SpendType, Expenditure) %>%#
-						select(TripIDNumber, Alcohol, FoodAndAlcohol = one_of("Food And Alcohol")) %>%#
-						mutate(FoodAndBeverages = FoodAndAlcohol - Alcohol) %>%#
-						select(-FoodAndAlcohol) %>% #
-						gather("SpendType", "Expenditure", 2:3)#
-# This is the data frame: 822486 (6 * 137081) This data frames removes the "alcohol" double counting#
-# in the original data set. Format: TripIDNumber, SpendType, Expenditure#
-df_trip_spend_new 	<- df_trip_spend_calc %>% #
-					filter(!SpendType %in% c("Alcohol", "Food And Alcohol")) %>%#
-					bind_rows(df_alcohol_beverage)#
-ASSERT: There is zero accomodation spend for every "day trips"#
-stopifnot(sum(df_trips[df_trips$TripType == "Day Trip", "Accom_Spend"]) == 0)#
-#
-# there are 90693 rows (i.e overnight trips) with accomodation expense#
-df_spend_accomodation <- df_trips %>% #
-						filter(TripType == "Overnight Trip") %>% #
-						select(TripIDNumber, Expenditure = Accom_Spend) %>% #
-						mutate(SpendType = "Accomodation") %>%#
-						select(TripIDNumber, SpendType, Expenditure)#
-#
-# here are the full 137,081 rows for transport spend#
-df_spend_transport <- df_trips %>% #
-						select(TripIDNumber, Expenditure = Trans_Spend) %>% #
-						mutate(SpendType = "Transport") %>%#
-						select(TripIDNumber, SpendType, Expenditure)#
-#
-# create a consolidated trip spend: 8 variables. #
-# nrows =  (7 * 137081) + (1 * 90693) = 1050260#
-df_spend_combined <- bind_rows(df_trip_spend_new, df_spend_accomodation, df_spend_transport)
-#========================================================================#
-# Time to focus on df_trip_spend#
-#
-df_trip_spend <- read.csv("data/vw_DTSTripSpend.csv" , header = TRUE) %>% #
-			filter(is.na(TripID) != TRUE)#
-df_trip_spend[df_trip_spend$SpendType == "Other   ", "SpendType"] <- "Other"	#
-# nrow() here is 822486 (6 * 137081)#
-df_trip_spend_calc <- df_trips[, c("TripIDNumber", "ExpenditureWeight")] %>% #
-		inner_join(df_trip_spend, by = c("TripIDNumber" = "TripID")) %>% #
-		mutate(Expenditure = ExpenditureWeight * ImputedSpendAmt) %>%#
-		select(TripIDNumber, SpendType, Expenditure)#
-# remove "alcohol" from "food and alcohol" and call it "FoodAndBeverages"#
-# nrows = 2 * 137081 = 274162#
-df_alcohol_beverage <- df_trip_spend_calc %>% #
-						filter(SpendType == "Alcohol" | SpendType == "Food And Alcohol") %>% #
-						spread(SpendType, Expenditure) %>%#
-						select(TripIDNumber, Alcohol, FoodAndAlcohol = one_of("Food And Alcohol")) %>%#
-						mutate(FoodAndBeverages = FoodAndAlcohol - Alcohol) %>%#
-						select(-FoodAndAlcohol) %>% #
-						gather("SpendType", "Expenditure", 2:3)#
-# This is the data frame: 822486 (6 * 137081) This data frames removes the "alcohol" double counting#
-# in the original data set. Format: TripIDNumber, SpendType, Expenditure#
-df_trip_spend_new 	<- df_trip_spend_calc %>% #
-					filter(!SpendType %in% c("Alcohol", "Food And Alcohol")) %>%#
-					bind_rows(df_alcohol_beverage)#
-#ASSERT: There is zero accomodation spend for every "day trips"#
-stopifnot(sum(df_trips[df_trips$TripType == "Day Trip", "Accom_Spend"]) == 0)#
-#
-# there are 90693 rows (i.e overnight trips) with accomodation expense#
-df_spend_accomodation <- df_trips %>% #
-						filter(TripType == "Overnight Trip") %>% #
-						select(TripIDNumber, Expenditure = Accom_Spend) %>% #
-						mutate(SpendType = "Accomodation") %>%#
-						select(TripIDNumber, SpendType, Expenditure)#
-#
-# here are the full 137,081 rows for transport spend#
-df_spend_transport <- df_trips %>% #
-						select(TripIDNumber, Expenditure = Trans_Spend) %>% #
-						mutate(SpendType = "Transport") %>%#
-						select(TripIDNumber, SpendType, Expenditure)#
-#
-# create a consolidated trip spend: 8 variables. #
-# nrows =  (7 * 137081) + (1 * 90693) = 1050260#
-df_spend_combined <- bind_rows(df_trip_spend_new, df_spend_accomodation, df_spend_transport)
+head(df_activities)
+aa <- inner_join(df_trips, df_activities, by = c("TripIDNumber" = "TripID"))
+nrow(aa)
+df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)
 head(df_trips)
-head(df_spend_combined)
-xx <- df_trips %>% inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber"))
-nrow(xx)
-# clear everything#
-rm(list = ls())#
-#
-# load some libaries #
-#library(lubridate)#
-library(dplyr)#
-library(stringr)#
-library(tidyr)#
-#
-options(stringsAsFactors = FALSE)#
-# do not display in scientific notation#
-options(scipen=999, digits = 10)#
-#
-setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
-#
-# calculates "length of stay"#
-#source('functions/fn_calc_los.R')#
-# creates a data.frame of column combinations for use in a group_by#
-source('functions/fn_create_column_combinations.R')#
-# uses column combinations to create various group_by#
-source('functions/fn_create_comb_aggregates.R')#
-# appends columns to a data.frame such that resultant df is always 8 columns wide#
-source('functions/fn_create_df_with_all.R')#
-# appends a data.frame with four columns#
-source('functions/fn_create_year_end.R')#
-# converts floating point number to text#
-source('functions/fn_convert_to_text.R')#
-# creates  yearend lookup table#
-source('functions/fn_create_YE_lookup.R')#
-# takes a dimension lookup and creates a dimension hierarchy#
-source('functions/fn_create_dim_hierarchy.R')#
-# PREAMBLE (data relationships)#
-# relationship between df_trips & df_accomodation: a person makes a trip and...#
-# stays in accomodation. When a person makes a day trip there is no need for..#
-# accomodation. Therefore only "Overnight trips" are included #
-# A single trip can have multiple accomodation values as a person..#
-# can stay in different hotels in the same or different locations#
-# the data is quarterly data#
-#
-# PLAN OF ATTACK#
-# 1) load two CSV files #
-# 2) process the two CVS files#
-# 3) create a data frame of complete years (where the number of quarters = 4)#
-# 4) combine the two data frames and aggregate by: #
-#		a) year end (4 quarterly year ends) and#
-#		b) four dimension variables#
-# 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
-# 6) create various aggregate combinations#
-# (1) LOAD data#
-# (1.1) load trips data (nrow = 137081)#
-df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
-#
-# (1.2) load and clean purpose of visit look up table data. #
-# file obtained from "p:\OTSP\SAS\DTS\Classifications\Purpose.xls"#
-df_purpose_lu <- read.csv("inputs/POV_to_POV_Group.csv", header = TRUE) %>% #
-		rename_("POV" = "Trip.Purpose.Description", #
-		"POV_Group" = "Trip.Purpose.Group.Description..Estimation.") %>%#
-		select(POV, POV_Group)#
-# RELATIONSHIP BETWEEN TRIPS AND TRIP_SPEND#
-# trips has 137081 rows trip_spend contains six different categories. Each of these categories#
-# has 137081 rows.  The number of rows in trip_spend is 6 * 137081 = 822486#
-#========================================================================#
-# TIDY UP df_trips Some values in trips.  This will enable a subsequent joint with "df_purpose_lu"#
-df_trips[df_trips$DestinationRTO == "Other   ", "DestinationRTO"] <- "Other"#
-#
-# the following aligns the purpose of visit (POV) values in df_trips to df_purpose_lu#
-# this is required to join the two tables#
-df_trips[is.na(df_trips$POV), "POV"] <- "None"#
-df_trips[df_trips$POV == "REFUSED", "POV"] <- "Refused"#
-df_trips[df_trips$POV == "Business   "  , "POV"] <- "Business"#
-df_trips[df_trips$POV == "Other Reason (specify)"  , "POV"] <- "Other"#
-df_trips[df_trips$POV == "Education Or Study"  , "POV"] <- "Education/Study"#
-df_trips[df_trips$POV == "Conference Or Convention"  , "POV"] <- "Conference or Convention"#
-df_trips[df_trips$POV == "Attending wedding/Family Occasion/Funeral"  , "POV"]  <- #
-							"Attending Wedding/Family Occasion/Funerals"#
-df_trips[df_trips$POV == "Visiting relatives"  , "POV"] <- "Visiting Relatives"#
-df_trips[df_trips$POV == "Participating in sports activity"  , "POV"]  <- #
-							"Participation in Sports Activity"#
-df_trips[df_trips$POV == "Publicised special event"  , "POV"] <- "Publicised Special Event"#
-df_trips[is.na(df_trips$ImputedSpendAccom),"ImputedSpendAccom"] <- 0#
-df_trips[is.na(df_trips$ExpenditureWeight), "ExpenditureWeight"] <- 0#
 df_trips <- df_trips %>% #
-			select(TripIDNumber, TripYear, TripQtr, TripType, #
-				DestinationRTO, POV, ExpenditureWeight, ImputedSpendAccom, ImputedSpendTrnsport)			#
+		select(TripIDNumber, TripYear, TripQtr, TripType, DestinationRTO, SmoothedTripWeight) %>%#
+		mutate(Total_Trips = SmoothedTripWeight)
+head(df_trips)
 df_trips <- df_trips %>% #
-			mutate(Accom_Spend = ExpenditureWeight * ImputedSpendAccom) %>%#
-			mutate(Trans_Spend = ExpenditureWeight * ImputedSpendTrnsport)#
+		select(TripIDNumber, TripYear, TripQtr, TripType, DestinationRTO, SmoothedTripWeight) %>%#
+		rename(Total_Trips = SmoothedTripWeight)
+df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
 #
-# add in POV_Group#
-df_trips <- df_trips %>% inner_join(df_purpose_lu, by = c("POV" = "POV"))#
-#========================================================================#
-# Time to focus on df_trip_spend#
+# (1.2) load and clean purpose of visit look up table data. #
+# file obtained from "p:\OTSP\SAS\DTS\Classifications\Purpose.xls"#
+df_purpose_lu <- read.csv("inputs/POV_to_POV_Group.csv", header = TRUE) %>% #
+		rename_("POV" = "Trip.Purpose.Description", #
+		"POV_Group" = "Trip.Purpose.Group.Description..Estimation.") %>%#
+		select(POV, POV_Group)#
 #
-df_trip_spend <- read.csv("data/vw_DTSTripSpend.csv" , header = TRUE) %>% #
-			filter(is.na(TripID) != TRUE)#
-df_trip_spend[df_trip_spend$SpendType == "Other   ", "SpendType"] <- "Other"	#
-# nrow() here is 822486 (6 * 137081)#
-df_trip_spend_calc <- df_trips[, c("TripIDNumber", "ExpenditureWeight")] %>% #
-		inner_join(df_trip_spend, by = c("TripIDNumber" = "TripID")) %>% #
-		mutate(Expenditure = ExpenditureWeight * ImputedSpendAmt) %>%#
-		select(TripIDNumber, SpendType, Expenditure)#
-# remove "alcohol" from "food and alcohol" and call it "FoodAndBeverages"#
-# nrows = 2 * 137081 = 274162#
-df_alcohol_beverage <- df_trip_spend_calc %>% #
-						filter(SpendType == "Alcohol" | SpendType == "Food And Alcohol") %>% #
-						spread(SpendType, Expenditure) %>%#
-						select(TripIDNumber, Alcohol, FoodAndAlcohol = one_of("Food And Alcohol")) %>%#
-						mutate(FoodAndBeverages = FoodAndAlcohol - Alcohol) %>%#
-						select(-FoodAndAlcohol) %>% #
-						gather("SpendType", "Expenditure", 2:3)#
-# This is the data frame: 822486 (6 * 137081) This data frames removes the "alcohol" double counting#
-# in the original data set. Format: TripIDNumber, SpendType, Expenditure#
-df_trip_spend_new 	<- df_trip_spend_calc %>% #
-					filter(!SpendType %in% c("Alcohol", "Food And Alcohol")) %>%#
-					bind_rows(df_alcohol_beverage)#
-#ASSERT: There is zero accomodation spend for every "day trips"#
-stopifnot(sum(df_trips[df_trips$TripType == "Day Trip", "Accom_Spend"]) == 0)#
+# nrow = 340,349#
+df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE) %>%#
+			select(-AnswerNumber, -LegNumber)#
 #
-# there are 90693 rows (i.e overnight trips) with accomodation expense#
-df_spend_accomodation <- df_trips %>% #
-						filter(TripType == "Overnight Trip") %>% #
-						select(TripIDNumber, Expenditure = Accom_Spend) %>% #
-						mutate(SpendType = "Accomodation") %>%#
-						select(TripIDNumber, SpendType, Expenditure)#
-#
-# here are the full 137,081 rows for transport spend#
-df_spend_transport <- df_trips %>% #
-						select(TripIDNumber, Expenditure = Trans_Spend) %>% #
-						mutate(SpendType = "Transport") %>%#
-						select(TripIDNumber, SpendType, Expenditure)#
-#
-# create a consolidated trip spend: 8 variables. #
-# nrows =  (7 * 137081) + (1 * 90693) = 1050260#
-df_spend_combined <- bind_rows(df_trip_spend_new, df_spend_accomodation, df_spend_transport)
+# nrow 137,081#
+df_trips <- df_trips %>% #
+		select(TripIDNumber, TripYear, TripQtr, TripType, DestinationRTO, SmoothedTripWeight) %>%#
+		rename(Total_Trips = SmoothedTripWeight)#
+df_combined <- inner_join(df_trips, df_activities, by = c("TripIDNumber" = "TripID"))
 head(df_trips)
-head(df_spend_combined)
-xx <- df_trips %>% #
-		inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber")) %>% #
-		filter(TripYear == 2010 & TripQtr == 3 ) %>%#
-		group_by(TripType, POV_Group, SpendType)  %>%#
-		summarise(total = sum(Expenditure))
-xx
-df_rec_2010_Q3 <- df_trips %>% #
-				inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber")) %>% #
-				filter(TripYear == 2010 & TripQtr == 3 ) %>%#
-				group_by(TripType, POV_Group, SpendType)  %>%#
-				summarise(total = sum(Expenditure)) %>%#
-				arrange(TripType, POV_Group, SpendType) %>% as.data.frame()
-df_rec_2010_Q3
-df_rec_2010_Q3 <- df_trips %>% #
-				inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber")) %>% #
-				filter(TripYear == 2010 & TripQtr == 3 ) %>%#
-				group_by(TripType, POV_Group, SpendType)  %>%#
-				summarise(total = sum(Expenditure)) %>%#
-				mutate(total = formatC(round(total,0), format="fg", big.mark = ","))#
-				arrange(TripType, POV_Group, SpendType) %>% as.data.frame()
-df_rec_2010_Q3 <- df_trips %>% #
-				inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber")) %>% #
-				filter(TripYear == 2010 & TripQtr == 3 ) %>%#
-				group_by(TripType, POV_Group, SpendType)  %>%#
-				summarise(total = sum(Expenditure)) %>%#
-				mutate(total = formatC(round(total,0), format="fg", big.mark = ",")) %>%#
-				arrange(TripType, POV_Group, SpendType) %>% as.data.frame()
-df_rec_2010_Q3
-df_rec_2010_Q3 <- df_trips %>% #
-				inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber")) %>% #
-				filter(TripYear == 2010 & TripQtr == 3 ) %>%#
-				group_by(TripType, SpendType, POV_Group)  %>%#
-				summarise(total = sum(Expenditure)) %>%#
-				mutate(total = formatC(round(total,0), format="fg", big.mark = ",")) %>%#
-				arrange(TripType, POV_Group, SpendType) %>% as.data.frame()
-df_rec_2010_Q3
-df_rec_2010_Q3 <- df_trips %>% #
-				inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber")) %>% #
-				filter(TripYear == 2010 & TripQtr == 3 ) %>%#
-				group_by(TripType, SpendType, POV_Group)  %>%#
-				summarise(total = sum(Expenditure)) %>%#
-				mutate(total = formatC(round(total,0), format="fg", big.mark = ",")) %>%#
-				select(TripType, SpendType, POV_Group, total)#
-				arrange(TripType,SpendType, POV_Group) %>% as.data.frame()#
-df_rec_2010_Q3
-df_rec_2010_Q3 <- df_trips %>% #
-				inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber")) %>% #
-				filter(TripYear == 2010 & TripQtr == 3 ) %>%#
-				group_by(TripType, SpendType, POV_Group)  %>%#
-				summarise(total = sum(Expenditure)) %>%#
-				mutate(total = formatC(round(total,0), format="fg", big.mark = ",")) %>%#
-				select(TripType, SpendType, POV_Group, total)#
-				arrange(TripType,SpendType, POV_Group) %>% as.data.frame()
-df_rec_2010_Q3 <- df_trips %>% #
-				inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber")) %>% #
-				filter(TripYear == 2010 & TripQtr == 3 ) %>%#
-				group_by(TripType, SpendType, POV_Group)  %>%#
-				summarise(total = sum(Expenditure)) %>%#
-				mutate(total = formatC(round(total,0), format="fg", big.mark = ",")) %>%#
-				select(TripType, SpendType, POV_Group, total)#
-				arrange(TripType, SpendType, POV_Group) %>% as.data.frame()
-df_rec_2010_Q3 <- df_trips %>% #
-				inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber")) %>% #
-				filter(TripYear == 2010 & TripQtr == 3 ) %>%#
-				group_by(TripType, SpendType, POV_Group)  %>%#
-				summarise(total = sum(Expenditure)) %>%#
-				mutate(total = formatC(round(total,0), format="fg", big.mark = ",")) %>%#
-				arrange(TripType, SpendType, POV_Group) %>% as.data.frame()
-df_rec_2010_Q3
-df_rec_2010_Q3 <- df_trips %>% #
-				inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber")) %>% #
-				filter(TripYear == 2010 & TripQtr == 3 ) %>%#
-				group_by(TripType, SpendType, POV_Group)  %>%#
-				summarise(total = sum(Expenditure)) %>%#
-				#mutate(total = formatC(round(total,0), format="fg", big.mark = ",")) %>%#
-				arrange(TripType, SpendType, POV_Group) %>% as.data.frame()
-sum(df_rec_2010_Q3$total)
-source('functions/fn_clean_trips .R')
-source('functions/fn_clean_trips.R')
+head(df_combined)
+aa <- df_combined %>% filter(TripYear == 2000 & TripQtr ==3)
+nrow(aa)
+bb <- df_combined %>% filter(TripYear == 2000 & TripQtr ==3) %>% select(-SurveyResponseID, -Activities) %>% distinct()
+nrow(bb)
+head(bb)
+sum(bb$Total_Trips)
 # (1.1) load trips data (nrow = 137081)#
 df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
 #
@@ -699,195 +184,29 @@ df_purpose_lu <- read.csv("inputs/POV_to_POV_Group.csv", header = TRUE) %>% #
 		rename_("POV" = "Trip.Purpose.Description", #
 		"POV_Group" = "Trip.Purpose.Group.Description..Estimation.") %>%#
 		select(POV, POV_Group)#
-# RELATIONSHIP BETWEEN TRIPS AND TRIP_SPEND#
-# trips has 137081 rows trip_spend contains six different categories. Each of these categories#
-# has 137081 rows.  The number of rows in trip_spend is 6 * 137081 = 822486#
-df_trips <- fn_clean_trips(df_trips)
-# clear everything#
-rm(list = ls())#
 #
-# load some libaries #
-#library(lubridate)#
-library(dplyr)#
-library(stringr)#
-library(tidyr)#
+# nrow = 340,349#
+df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE) %>%#
+			select(-AnswerNumber, -LegNumber)#
 #
-options(stringsAsFactors = FALSE)#
-# do not display in scientific notation#
-options(scipen=999, digits = 10)#
-#
-setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
-#
-# calculates "length of stay"#
-#source('functions/fn_calc_los.R')#
-# creates a data.frame of column combinations for use in a group_by#
-source('functions/fn_create_column_combinations.R')#
-# uses column combinations to create various group_by#
-source('functions/fn_create_comb_aggregates.R')#
-# appends columns to a data.frame such that resultant df is always 8 columns wide#
-source('functions/fn_create_df_with_all.R')#
-# appends a data.frame with four columns#
-source('functions/fn_create_year_end.R')#
-# converts floating point number to text#
-source('functions/fn_convert_to_text.R')#
-# creates  yearend lookup table#
-source('functions/fn_create_YE_lookup.R')#
-# takes a dimension lookup and creates a dimension hierarchy#
-source('functions/fn_create_dim_hierarchy.R')#
-#
-source('functions/fn_clean_trips.R')#
-# PREAMBLE (data relationships)#
-# relationship between df_trips & df_accomodation: a person makes a trip and...#
-# stays in accomodation. When a person makes a day trip there is no need for..#
-# accomodation. Therefore only "Overnight trips" are included #
-# A single trip can have multiple accomodation values as a person..#
-# can stay in different hotels in the same or different locations#
-# the data is quarterly data#
-#
-# PLAN OF ATTACK#
-# 1) load two CSV files #
-# 2) process the two CVS files#
-# 3) create a data frame of complete years (where the number of quarters = 4)#
-# 4) combine the two data frames and aggregate by: #
-#		a) year end (4 quarterly year ends) and#
-#		b) four dimension variables#
-# 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
-# 6) create various aggregate combinations#
-# (1) LOAD data#
-# (1.1) load trips data (nrow = 137081)#
-df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
-#
-# (1.2) load and clean purpose of visit look up table data. #
-# file obtained from "p:\OTSP\SAS\DTS\Classifications\Purpose.xls"#
-df_purpose_lu <- read.csv("inputs/POV_to_POV_Group.csv", header = TRUE) %>% #
-		rename_("POV" = "Trip.Purpose.Description", #
-		"POV_Group" = "Trip.Purpose.Group.Description..Estimation.") %>%#
-		select(POV, POV_Group)#
-# RELATIONSHIP BETWEEN TRIPS AND TRIP_SPEND#
-# trips has 137081 rows trip_spend contains six different categories. Each of these categories#
-# has 137081 rows.  The number of rows in trip_spend is 6 * 137081 = 822486#
-df_trips <- fn_clean_trips(df_trips)
-unique(df_trips$POV)
-# clear everything#
-rm(list = ls())#
-#
-# load some libaries #
-#library(lubridate)#
-library(dplyr)#
-library(stringr)#
-library(tidyr)#
-#
-options(stringsAsFactors = FALSE)#
-# do not display in scientific notation#
-options(scipen=999, digits = 10)#
-#
-setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
-#
-# calculates "length of stay"#
-#source('functions/fn_calc_los.R')#
-# creates a data.frame of column combinations for use in a group_by#
-source('functions/fn_create_column_combinations.R')#
-# uses column combinations to create various group_by#
-source('functions/fn_create_comb_aggregates.R')#
-# appends columns to a data.frame such that resultant df is always 8 columns wide#
-source('functions/fn_create_df_with_all.R')#
-# appends a data.frame with four columns#
-source('functions/fn_create_year_end.R')#
-# converts floating point number to text#
-source('functions/fn_convert_to_text.R')#
-# creates  yearend lookup table#
-source('functions/fn_create_YE_lookup.R')#
-# takes a dimension lookup and creates a dimension hierarchy#
-source('functions/fn_create_dim_hierarchy.R')#
-# this is a collection of statements that changes a few values#
-source('functions/fn_clean_trips.R')#
-# PREAMBLE (data relationships)#
-# relationship between df_trips & df_accomodation: a person makes a trip and...#
-# stays in accomodation. When a person makes a day trip there is no need for..#
-# accomodation. Therefore only "Overnight trips" are included #
-# A single trip can have multiple accomodation values as a person..#
-# can stay in different hotels in the same or different locations#
-# the data is quarterly data#
-#
-# PLAN OF ATTACK#
-# 1) load two CSV files #
-# 2) process the two CVS files#
-# 3) create a data frame of complete years (where the number of quarters = 4)#
-# 4) combine the two data frames and aggregate by: #
-#		a) year end (4 quarterly year ends) and#
-#		b) four dimension variables#
-# 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
-# 6) create various aggregate combinations#
-# (1) LOAD data#
-# (1.1) load trips data (nrow = 137081)#
-df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
-#
-# (1.2) load and clean purpose of visit look up table data. #
-# file obtained from "p:\OTSP\SAS\DTS\Classifications\Purpose.xls"#
-df_purpose_lu <- read.csv("inputs/POV_to_POV_Group.csv", header = TRUE) %>% #
-		rename_("POV" = "Trip.Purpose.Description", #
-		"POV_Group" = "Trip.Purpose.Group.Description..Estimation.") %>%#
-		select(POV, POV_Group)#
-# RELATIONSHIP BETWEEN TRIPS AND TRIP_SPEND#
-# trips has 137081 rows trip_spend contains six different categories. Each of these categories#
-# has 137081 rows.  The number of rows in trip_spend is 6 * 137081 = 822486#
-#========================================================================#
-# TIDY UP df_trips Some values in trips.  This will enable a subsequent join with "df_purpose_lu"#
-df_trips <- fn_clean_trips(df_trips)
+# nrow 137,081#
+df_trips <- df_trips %>% #
+		select(TripIDNumber, TripYear, TripQtr, TripType, DestinationRTO, SmoothedTripWeight) %>%#
+		rename(Total_Trips = SmoothedTripWeight)
 head(df_trips)
-source('functions/fn_clean_spend.R')
-xx <- fn_clean_spend(df_trip_spend, df_trips )
-df_trip_spend <- read.csv("data/vw_DTSTripSpend.csv" , header = TRUE) %>% #
-			filter(is.na(TripID) != TRUE)#
-#
-source('functions/fn_clean_spend.R')#
-xx <- fn_clean_spend(df_trip_spend, df_trips )
-df_trip_spend <- read.csv("data/vw_DTSTripSpend.csv" , header = TRUE) %>% #
-			filter(is.na(TripID) != TRUE)#
-#
-source('functions/fn_clean_spend.R')#
-xx <- fn_clean_spend(df_trip_spend, df_trips )
-df_trip_spend <- read.csv("data/vw_DTSTripSpend.csv" , header = TRUE) %>% #
-			filter(is.na(TripID) != TRUE)#
-#
-source('functions/fn_clean_spend.R')#
-xx <- fn_clean_spend(df_trip_spend, df_trips )
-source('functions/fn_clean_spend.R')#
-#
-xx <- fn_clean_spend(df_trip_spend, df_trips )
-source('functions/fn_clean_spend.R')#
-#
-xx <- fn_clean_spend(df_trip_spend, df_trips )
-source('functions/fn_clean_spend.R')#
-#
-xx <- fn_clean_spend(df_trip_spend, df_trips )
-source('functions/fn_clean_spend.R')#
-#
-xx <- fn_clean_spend(df_trip_spend, df_trips )
-head(df_trips)
-df_trips <- fn_clean_trips(df_trips)
-head(df_trips)
-source('functions/fn_clean_trips.R')
-df_trips <- fn_clean_trips(df_trips)
-head(df_trips)
-df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
-source('functions/fn_clean_trips.R')#
-df_trips <- fn_clean_trips(df_trips)
-head(df_trips)
-fn_clean_trips
-df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
-source('functions/fn_clean_trips.R')#
-df_trips <- fn_clean_trips(df_trips)
-head(df_trips)
-df_trip_spend <- read.csv("data/vw_DTSTripSpend.csv" , header = TRUE) %>% #
-			filter(is.na(TripID) != TRUE)
-source('functions/fn_clean_spend.R')#
-#
-xx <- fn_clean_spend(df_trip_spend, df_trips )
-head(xx)
+2010Q3 <- df_trips %>% filter(TripYear == 2010 & TripQtr == 3)
+xx <- df_trips %>% filter(TripYear == 2010 & TripQtr == 3)
 nrow(xx)
-unique(xx$SpendType)
-fn_clean_spend
+sum(xx$Total_Trips)
+unique(df_activities$Activities)
+sort(unique(df_activities$Activities))
+head(df_activities)
+sort(unique(df_activities$Activities))
+df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE) %>%#
+			select(-AnswerNumber, -LegNumber)
+head(df_activities)
+?xlsx
+library(xlsx)
 # clear everything#
 rm(list = ls())#
 #
@@ -896,122 +215,164 @@ rm(list = ls())#
 library(dplyr)#
 library(stringr)#
 library(tidyr)#
+library(xlsx)#
 #
 options(stringsAsFactors = FALSE)#
 # do not display in scientific notation#
 options(scipen=999, digits = 10)#
 #
 setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
+aa <- read.xlsx('inputs/ivs_activities_classification.xlsx', 3)
+aa
+aa <- read.xlsx('inputs/ivs_activities_classification.xlsx', sheetIndex=3, rowIndex=2, colIndex=2)
+aa <- read.xlsx('inputs/ivs_activities_classification.xlsx', sheetIndex = 3, rowIndex = 2)
+aa
+aa
+aa <- read.xlsx('inputs/ivs_activities_classification.xlsx', sheetIndex = 3, rowIndex = 2:143)
+aa
+aa <- read.xlsx('inputs/ivs_activities_classification.xlsx', #
+		sheetIndex = 3, rowIndex = 2:143, colIndex = 2:5)
+aa
+class(aa)
+?for
+?for
+for (i in 1:nrow(df_class) {#
+	print(df_class[i, 2])#
+}
+for (i in 1:nrow(df_class)) {#
+	print(df_class[i, 2])#
+}
+df_class <- read.xlsx('inputs/ivs_activities_classification.xlsx', #
+					sheetIndex = 3, rowIndex = 2:143, colIndex = 2:5)
+for (i in 1:nrow(df_class)) {#
+	print(df_class[i, 2])#
+}
+for (i in 1:nrow(df_class)) {#
+	if (is.na(df_class[i,2])) {#
+		print("this is an NA")#
+	}#
+}
+df_class <- read.xlsx('inputs/ivs_activities_classification.xlsx', #
+					sheetIndex = 3, rowIndex = 2:143, colIndex = 2:5)#
 #
-# calculates "length of stay"#
-#source('functions/fn_calc_los.R')#
-# creates a data.frame of column combinations for use in a group_by#
-source('functions/fn_create_column_combinations.R')#
-# uses column combinations to create various group_by#
-source('functions/fn_create_comb_aggregates.R')#
-# appends columns to a data.frame such that resultant df is always 8 columns wide#
-source('functions/fn_create_df_with_all.R')#
-# appends a data.frame with four columns#
-source('functions/fn_create_year_end.R')#
-# converts floating point number to text#
-source('functions/fn_convert_to_text.R')#
-# creates  yearend lookup table#
-source('functions/fn_create_YE_lookup.R')#
-# takes a dimension lookup and creates a dimension hierarchy#
-source('functions/fn_create_dim_hierarchy.R')#
-# this is a collection of statements that changes a few values#
-source('functions/fn_clean_trips.R')#
+for (i in 1:nrow(df_class)) {#
+	if (is.na(df_class[i,2])) {#
+		df_class[i, 2] <- df_class[i - 1, 2]#
+	}#
+}
+df_class
+df_class[c(1,3),] <- NULL
+df_class[, c(1,3)] <- NULL
+df_class[, 3] <- NULL
+head(df_class)
+setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
+df_class <- read.xlsx('inputs/ivs_activities_classification.xlsx', #
+					sheetIndex = 3, rowIndex = 2:143, colIndex = 2:5)#
 #
-source('functions/fn_clean_spend.R')#
-# PREAMBLE (data relationships)#
-# relationship between df_trips & df_accomodation: a person makes a trip and...#
-# stays in accomodation. When a person makes a day trip there is no need for..#
-# accomodation. Therefore only "Overnight trips" are included #
-# A single trip can have multiple accomodation values as a person..#
-# can stay in different hotels in the same or different locations#
-# the data is quarterly data#
+for (i in 1:nrow(df_class)) {#
+	if (is.na(df_class[i,2])) {#
+		df_class[i, 2] <- df_class[i - 1, 2]#
+	}#
+}
+head(df_class)
+df_class[, c(1, 3), with = FALSE] <- NULL
+df_class[, c(1, 3)] <- NULL
+c(1, 3)
+df_class[, c(1, 3)]
+df_class <- read.xlsx('inputs/ivs_activities_classification.xlsx', #
+					sheetIndex = 3, rowIndex = 2:143, colIndex = 2:5)#
 #
-# PLAN OF ATTACK#
-# 1) load two CSV files #
-# 2) process the two CVS files#
-# 3) create a data frame of complete years (where the number of quarters = 4)#
-# 4) combine the two data frames and aggregate by: #
-#		a) year end (4 quarterly year ends) and#
-#		b) four dimension variables#
-# 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
-# 6) create various aggregate combinations#
-# (1) LOAD data#
-# (1.1) load trips data (nrow = 137081)#
-df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
+for (i in 1:nrow(df_class)) {#
+	if (is.na(df_class[i,2])) {#
+		df_class[i, 2] <- df_class[i - 1, 2]#
+	}#
+}#
 #
-# (1.2) load and clean purpose of visit look up table data. #
-# file obtained from "p:\OTSP\SAS\DTS\Classifications\Purpose.xls"#
-df_purpose_lu <- read.csv("inputs/POV_to_POV_Group.csv", header = TRUE) %>% #
-		rename_("POV" = "Trip.Purpose.Description", #
-		"POV_Group" = "Trip.Purpose.Group.Description..Estimation.") %>%#
-		select(POV, POV_Group)#
-# RELATIONSHIP BETWEEN TRIPS AND TRIP_SPEND#
-# trips has 137081 rows trip_spend contains six different categories. Each of these categories#
-# has 137081 rows.  The number of rows in trip_spend is 6 * 137081 = 822486#
-#========================================================================#
-# TIDY UP df_trips Some values in trips.  This will enable a subsequent join with "df_purpose_lu"#
+# drop the first and third columsn, these are codes#
+df_class <- df_class[, -c(1, 3)]
+head(df_class)
+setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
+df_class <- read.xlsx('inputs/ivs_activities_classification.xlsx', #
+					sheetIndex = 3, rowIndex = 2:143, colIndex = 2:5)#
 #
-df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
+for (i in 1:nrow(df_class)) {#
+	if (is.na(df_class[i,2])) {#
+		df_class[i, 2] <- df_class[i - 1, 2]#
+	}#
+}#
 #
-df_trips <- fn_clean_trips(df_trips)#
+# drop the first and third columsn, these are codes#
+df_class <- df_class[, -c(1, 3)]#
 #
-df_trip_spend <- read.csv("data/vw_DTSTripSpend.csv" , header = TRUE) %>% #
-			filter(is.na(TripID) != TRUE)#
-df_spend_combined <- fn_clean_spend(df_trip_spend, df_trips )			#
+names(df_class) <- c("Activity_Group", "Activity")
+head(df_class)
+head(df_class, 20)
+# nrow = 340,349#
+df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE) %>%#
+			select(-AnswerNumber, -LegNumber)
+un_activity <- unique(df_activities$Activities)
+un_activity
+un_activity <- unique(df_activities$Activities)
+df_class
+nrow(df_class)
+length(unique(df_class$Activity))
+df_class %>% filter(Activity %in% un_activity)
+vct_activity <- unique(df_activities$Activities)
+df_class %>% filter(Activity %in% vct_activity)
+df_class %>% filter(!Activity %in% vct_activity)
+vct_activity
+sort(vct_activity)
+df_class %>% filter(!Activity %in% vct_activity)
+vct_activity[!vct_activity %in% df_class$Activity]
+df_class[df_class$Activity == "Walk in City", "Activity"] <- "Walk In City"#
+# show df_class that it is not in vct_activity#
+df_class %>% filter(!Activity %in% vct_activity)#
 #
-#========================================================================#
-# Time to focus on df_trip_spend#
+# show the oposite#
+vct_activity[!vct_activity %in% df_class$Activity]
+# nrow = 340,349#
+df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE) %>%#
+			select(-AnswerNumber, -LegNumber)#
+df_activities[df_activities$Activities == "Business   " ,  "Activities"] <- "Business"#
+vct_activity <- unique(df_activities$Activities)#
+df_class[df_class$Activity == "Walk in City", "Activity"] <- "Walk In City"#
+# show df_class that it is not in vct_activity#
+df_class %>% filter(!Activity %in% vct_activity)#
 #
-df_rec_2010_Q3 <- df_trips %>% #
-				inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber")) %>% #
-				filter(TripYear == 2010 & TripQtr == 3 ) %>%#
-				group_by(TripType, SpendType, POV_Group)  %>%#
-				summarise(total = sum(Expenditure)) %>%#
-				#mutate(total = formatC(round(total,0), format="fg", big.mark = ",")) %>%#
-				arrange(TripType, SpendType, POV_Group) %>% as.data.frame()
-df_rec_2010_Q3
-df_rec_2010_Q3 <- df_trips %>% #
-				inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber")) %>% #
-				filter(TripYear == 2010 & TripQtr == 3 ) %>%#
-				group_by(TripType, SpendType, POV_Group)  %>%#
-				summarise(total = sum(Expenditure)) %>%#
-				mutate(totals = formatC(round(total,0), format="fg", big.mark = ",")) %>%#
-				arrange(TripType, SpendType, POV_Group) %>% as.data.frame()
-head(df_rec_2010_Q3)
-sum(df_rec_2010_Q3$total)
-sum(df_rec_2010_Q3$total) == 1700540403
-as.integer(sum(df_rec_2010_Q3$total))
-as.integer(sum(df_rec_2010_Q3$total)) == 1700540403
-stopifnot(as.integer(sum(df_rec_2010_Q3$total)) == 1700540403)
-stopifnot(nrow(anti_join(df_purpose_lu, df_trips, by = c("POV" = "POV"))) == 0)
-head(df_trips)
-aa <- df_trips %>% select(-ExpenditureWeight, ImputedSpendAccom, ImputedSpendTrnsport, Accom_Spend, Trans_Spend)
-head(aa)
-aa <- df_trips %>% select(-ExpenditureWeight, -ImputedSpendAccom, -ImputedSpendTrnsport, -Accom_Spend, -Trans_Spend)
-head(aa)
-aa <- df_trips %>% select(-ExpenditureWeight, -ImputedSpendAccom, -ImputedSpendTrnsport, -Accom_Spend, -Trans_Spend)
-head(df_spend_combined)
-df_rec_2010_Q3 <- df_trips %>% #
-				inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber")) %>% #
-				filter(TripYear == 2010 & TripQtr == 3 ) %>%#
-				group_by(TripType, SpendType, POV_Group)  %>%#
-				summarise(total = sum(Expenditure)) %>%#
-				mutate(totals = formatC(round(total,0), format="fg", big.mark = ",")) %>%#
-				arrange(TripType, SpendType, POV_Group) %>% as.data.frame()
-head(df_rec_2010_Q3)
-stopifnot(as.integer(sum(df_rec_2010_Q3$total)) == 1700540403)
-head(df_spend_combined)
-unique(df_spend_combined$SpendType)
-df_trips_combined 	<- df_trips %>% #
-					inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber"))
-nrow(df_trips_combined)
-head(df_trips_combined)
-nrow(df_trips_combined)
+# show the oposite#
+vct_activity[!vct_activity %in% df_class$Activity]#
+sort(vct_activity)
+# show df_class that it is not in vct_activity#
+df_class %>% filter(!Activity %in% vct_activity)#
+#
+# show the oposite#
+vct_activity[!vct_activity %in% df_class$Activity]
+df_class[df_class$Activity == "Walk in City", "Activity"] <- "Walk In City"#
+df_class[df_class$Activity == "Refused To Answer", "Activity"] <- "Refused to Answer"#
+df_class[df_class$Activity == "Scenic Flight (heli, plane)", "Activity"] <- "Scenic Flight (Heli, Plane)"#
+df_class[df_class$Activity == "Cycling (on-road)", "Activity"] <- "Cycling (On-road)"#
+df_class[df_class$Activity == "Arts and Crafts", "Activity"] <- "Arts And Crafts"
+# show df_class that it is not in vct_activity#
+df_class %>% filter(!Activity %in% vct_activity)#
+#
+# show the oposite#
+vct_activity[!vct_activity %in% df_class$Activity]
+df_class[df_class$Activity == "Mountain Biking (off-road)", "Activity"]  <-#
+"Mountain Biking (Off-road)" #
+#
+df_class[df_class$Activity == "Zoos/Wildlife/Marine Parks (e.g. Kelly Tarltons, Orana Park,", "Activity"] <-#
+"Zoos/Wildlife/Marine Parks (e.g. Kelly Tarltons, Orana Park, Wellington Zoo)"#
+#
+df_class[df_class$Activity == "Personal Business (incl. family help/financial/househunting)" , "Activity"] <-#
+"Personal Business (incl. family help/financial/house hunting)"#
+#
+df_class[df_class$Activity == "Dont Know" , "Activity"] <- "Dont know"
+# show df_class that it is not in vct_activity#
+df_class %>% filter(!Activity %in% vct_activity)#
+#
+# show the oposite#
+vct_activity[!vct_activity %in% df_class$Activity]
+source('functions/fn_get_classification.R')
 # clear everything#
 rm(list = ls())#
 #
@@ -1047,6 +408,76 @@ source('functions/fn_create_dim_hierarchy.R')#
 source('functions/fn_clean_trips.R')#
 # this function cleans up "vw_DTSTripSpend.csv" It removes "alcohol" from "Food and Alcohol"#
 source('functions/fn_clean_spend.R')#
+source('functions/fn_get_classification.R')
+aa <- fn_get_classification()
+aa
+remove.packages(xlsx)
+remove.packages('xlsx')
+# nrow = 340,349#
+df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE) %>%#
+			select(-AnswerNumber, -LegNumber)#
+df_activities[df_activities$Activities == "Business   " ,  "Activities"] <- "Business"
+head(df_activities)
+df_activity_classification <- fn_get_classification()
+head(df_activity_classification)
+aa <- df_activities %>% inner_join(df_activity_classification, by = c("Activities" = "Activity"))
+head(aa)
+nrow(aa)
+df_activities <- df_activities %>% #
+ 			inner_join(df_activity_classification, by = c("Activities" = "Activity")) %>%#
+ 			select(TripID, Activity_Group, Activities)
+head(df_activities)
+head(df_trips)
+# (1.1) load trips data (nrow = 137081)#
+df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)
+head(df_trips)
+df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
+#
+# nrow 137,081#
+df_trips <- df_trips %>% #
+		select(TripIDNumber, TripYear, TripQtr, TripType, DestinationRTO, SmoothedTripWeight) %>%#
+		rename(Total_Trips = SmoothedTripWeight)
+head(df_trips)
+df_combined <- inner_join(df_trips, df_activities, by = c("TripIDNumber" = "TripID"))
+head(df_combined)
+nrow(df_combined)
+# clear everything#
+rm(list = ls())#
+#
+# load some libaries #
+#library(lubridate)#
+library(dplyr)#
+library(stringr)#
+library(tidyr)#
+#
+options(stringsAsFactors = FALSE)#
+# do not display in scientific notation#
+options(scipen=999, digits = 10)#
+#
+setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
+#
+# calculates "length of stay"#
+#source('functions/fn_calc_los.R')#
+# creates a data.frame of column combinations for use in a group_by#
+source('functions/fn_create_column_combinations.R')#
+# uses column combinations to create various group_by#
+source('functions/fn_create_comb_aggregates.R')#
+# appends columns to a data.frame such that resultant df is always 8 columns wide#
+source('functions/fn_create_df_with_all.R')#
+# appends a data.frame with four columns#
+source('functions/fn_create_year_end.R')#
+# converts floating point number to text#
+source('functions/fn_convert_to_text.R')#
+# creates  yearend lookup table#
+source('functions/fn_create_YE_lookup.R')#
+# takes a dimension lookup and creates a dimension hierarchy#
+source('functions/fn_create_dim_hierarchy.R')#
+# this is a collection of statements that changes a few values so it can join with "df_purpose_lu"#
+source('functions/fn_clean_trips.R')#
+# this function cleans up "vw_DTSTripSpend.csv" It removes "alcohol" from "Food and Alcohol"#
+source('functions/fn_clean_spend.R')#
+# loads a prepares an activity classification table#
+source('functions/fn_get_classification.R')#
 # PREAMBLE (data relationships)#
 # relationship between df_trips & df_accomodation: a person makes a trip and...#
 # stays in accomodation. When a person makes a day trip there is no need for..#
@@ -1064,150 +495,333 @@ source('functions/fn_clean_spend.R')#
 #		b) four dimension variables#
 # 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
 # 6) create various aggregate combinations#
-# (1) LOAD data#
-# (1.1) load trips data (nrow = 137081)#
+#
+# ==============================================================================================#
+#
+# (1) LOAD and Prepare data#
+# 1,a TRIPS#
 df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
 #
-# (1.2) load and clean purpose of visit look up table data. #
-# file obtained from "p:\OTSP\SAS\DTS\Classifications\Purpose.xls"#
-df_purpose_lu <- read.csv("inputs/POV_to_POV_Group.csv", header = TRUE) %>% #
-		rename_("POV" = "Trip.Purpose.Description", #
-		"POV_Group" = "Trip.Purpose.Group.Description..Estimation.") %>%#
-		select(POV, POV_Group)#
+# nrow 137,081#
+df_trips <- df_trips %>% #
+		select(TripIDNumber, TripYear, TripQtr, TripType, DestinationRTO, SmoothedTripWeight) %>%#
+		rename(Total_Trips = SmoothedTripWeight)#
+# 1.b ACTIVITIES#
+# This function gets an XL spreasheet and cleans some values so it matches with df_activities#
+df_activity_classification <- fn_get_classification()#
 #
-# RELATIONSHIP BETWEEN TRIPS AND TRIP_SPEND#
-# trips has 137081 rows trip_spend contains six different categories. Each of these categories#
-# has 137081 rows.  The number of rows in trip_spend is 6 * 137081 = 822486#
+# nrow = 340,349#
+df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE) %>%#
+			select(-AnswerNumber, -LegNumber)#
 #
+# clean up a rogue value#
+df_activities[df_activities$Activities == "Business   " ,  "Activities"] <- "Business"#
+#
+# append activity group to df_activies#
+df_activities <- df_activities %>% #
+ 			inner_join(df_activity_classification, by = c("Activities" = "Activity")) %>%#
+ 			select(TripID, Activity_Group, Activities)#
+df_combined <- inner_join(df_trips, df_activities, by = c("TripIDNumber" = "TripID"))
+head(df_combined)
+?first
+aa <-df_combined %>% group_by(TripIDNumber) %>% first(Total_Trips)
+aa <-df_combined %>% group_by(TripIDNumber) %>% first(Total_Trips)
+aa <-df_combined %>% filter(TripYear == 2010 & TripQtr == 3) %>% distinct(TripIDNumber, Total_Trips)
+head(aa)
+sum(aa$Total_Trips)
+aa <-df_combined %>% filter(TripYear == 2010 & TripQtr == 3) %>% distinct(TripIDNumber)
+sum(aa$Total_Trips)
+aa
+sum(aa$Total_Trips)
+key <- c('A', "A", "A", "B", "B", "C")#
+amount <- c(20, 20, 20, 10, 10, 15)#
+place <- c("FIN", "FIN", "FIN", "NZ", "NZ", "AUS")#
+#
+df_test <- data.frame(key, amount, place)
+df_test
+key <- c('A', "A", "A", "B", "B", "C")#
+amount <- c(20, 20, 20, 10, 10, 15)#
+place <- c("FIN", "CHF", "ENG", "NZ", "CAN", "AUS")#
+#
+df_test <- data.frame(key, amount, place)
+df_test
+df_test %>% distinct(key)
+head(df_combined)
+df_combined %>% #
+		filter(TripYear == 2010, TripQtr = 3) %>% #
+		distinct(TripIDNumber) %>% summarise(total = sum(Total_Trips))
+df_combined %>% filter(TripYear == 2010 & TripQtr = 3) %>% #
+		distinct(TripIDNumber) %>% summarise(total = sum(Total_Trips))
+df_combined %>% filter(TripYear == 2010 & TripQtr = 3) %>% #
+		distinct(TripIDNumber) %>% summarise(total = sum(Total_Trips))
+aa <- df_combined %>% filter(TripYear == 2010 & TripQtr = 3)
+aa <- df_combined %>% filter(TripYear == 2010 & TripQtr == 3) %>% #
+		distinct(TripIDNumber) %>% summarise(total = sum(Total_Trips))
+aa
+df_rec <- df_combined %>% filter(TripYear == 2010 & TripQtr == 3) %>% #
+			distinct(TripIDNumber) %>% summarise(total = sum(Total_Trips))
+class(df_rec)
+as.integer(df_rec$total)
+as.integer(df_rec$total) == 8465427
+s.integer(df_rec$total)
+as.integer(df_rec$total)
+round(df_rec$total, 0)
+round(df_rec$total, 0) == 8465427
+stopifnot(round(df_rec$total, 0) == 8465427)
+df_rec <- df_combined %>% filter(TripYear == 2010 & TripQtr == 3) %>% #
+			distinct(TripIDNumber) %>% summarise(total = sum(Total_Trips))#
+#
+stopifnot(round(df_rec$total, 0) == 8465427)#
+rm(df_rec)
+# clear everything#
+rm(list = ls())#
+#
+# load some libaries #
+#library(lubridate)#
+library(dplyr)#
+library(stringr)#
+library(tidyr)#
+#
+options(stringsAsFactors = FALSE)#
+# do not display in scientific notation#
+options(scipen=999, digits = 10)#
+#
+setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
+#
+# calculates "length of stay"#
+#source('functions/fn_calc_los.R')#
+# creates a data.frame of column combinations for use in a group_by#
+source('functions/fn_create_column_combinations.R')#
+# uses column combinations to create various group_by#
+source('functions/fn_create_comb_aggregates.R')#
+# appends columns to a data.frame such that resultant df is always 8 columns wide#
+source('functions/fn_create_df_with_all.R')#
+# appends a data.frame with four columns#
+source('functions/fn_create_year_end.R')#
+# converts floating point number to text#
+source('functions/fn_convert_to_text.R')#
+# creates  yearend lookup table#
+source('functions/fn_create_YE_lookup.R')#
+# takes a dimension lookup and creates a dimension hierarchy#
+source('functions/fn_create_dim_hierarchy.R')#
+# this is a collection of statements that changes a few values so it can join with "df_purpose_lu"#
+source('functions/fn_clean_trips.R')#
+# this function cleans up "vw_DTSTripSpend.csv" It removes "alcohol" from "Food and Alcohol"#
+source('functions/fn_clean_spend.R')#
+# loads a prepares an activity classification table#
+source('functions/fn_get_classification.R')#
+# PREAMBLE (data relationships)#
+# relationship between df_trips & df_accomodation: a person makes a trip and...#
+# stays in accomodation. When a person makes a day trip there is no need for..#
+# accomodation. Therefore only "Overnight trips" are included #
+# A single trip can have multiple accomodation values as a person..#
+# can stay in different hotels in the same or different locations#
+# the data is quarterly data#
+#
+# PLAN OF ATTACK#
+# 1) load two CSV files #
+# 2) process the two CVS files#
+# 3) create a data frame of complete years (where the number of quarters = 4)#
+# 4) combine the two data frames and aggregate by: #
+#		a) year end (4 quarterly year ends) and#
+#		b) four dimension variables#
+# 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
+# 6) create various aggregate combinations#
 #========================================================================#
-# Prepare "Trips" and "TripSpend" data#
-#========================================================================#
+# (1) LOAD and Prepare data#
+# 1,a TRIPS#
 df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
-df_trips <- fn_clean_trips(df_trips)#
 #
-# ASSERT: df_purpose_lu$POV are all contained in df_trips$POV#
-stopifnot(nrow(anti_join(df_purpose_lu, df_trips, by = c("POV" = "POV"))) == 0)#
+# nrow 137,081#
+df_trips <- df_trips %>% #
+		select(TripIDNumber, TripYear, TripQtr, TripType, DestinationRTO, SmoothedTripWeight) %>%#
+		rename(Total_Trips = SmoothedTripWeight)#
+# 1.b ACTIVITIES#
+# This function gets an XL spreasheet and cleans some values so it matches with df_activities#
+df_activity_classification <- fn_get_classification()#
 #
-df_trip_spend <- read.csv("data/vw_DTSTripSpend.csv" , header = TRUE) %>% #
-			filter(is.na(TripID) != TRUE)#
+# nrow = 340,349#
+df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE) %>%#
+			select(-AnswerNumber, -LegNumber)#
 #
-# in the original "vw_DTSTripSpend.csv" data, SpendType has 6 levels. We now get#
-# accomodation and transport from "vw_DTSTrips.csv" and create 2 additional levels.#
-# also "alcohol" is taken out from "food and alcohol" to prevent double counting "alcohol"#
-df_spend_combined <- fn_clean_spend(df_trip_spend, df_trips)#
+# clean up a rogue value#
+df_activities[df_activities$Activities == "Business   " ,  "Activities"] <- "Business"#
 #
-# clean off unecessary columns from df_trips.#
-df_trips <- df_trips %>% select(-ExpenditureWeight, -ImputedSpendAccom, #
-				-ImputedSpendTrnsport, -Accom_Spend, -Trans_Spend)#
+# append activity group to df_activies#
+df_activities <- df_activities %>% #
+ 			inner_join(df_activity_classification, by = c("Activities" = "Activity")) %>%#
+ 			select(TripID, Activity_Group, Activities)#
+df_combined <- inner_join(df_trips, df_activities, by = c("TripIDNumber" = "TripID"))#
 #
 #========================================================================#
-# RECONCILIATION POINT #
+#
+#========================================================================#
 # RECONCILIATION POINT. The following code snippet should reconcile to #
-# # P:\OTSP\SAS\DTS\Output\2010Q3\reports\Est_Qtr_Expend_Type_Item_Purpose.xls#
-# see also \workings\spend_reconciliation.xlsx for easier-to-read formated version of #
-# the original spreadsheet#
-#========================================================================#
-df_rec_2010_Q3 <- df_trips %>% #
-				inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber")) %>% #
-				filter(TripYear == 2010 & TripQtr == 3 ) %>%#
-				group_by(TripType, SpendType, POV_Group)  %>%#
-				summarise(total = sum(Expenditure)) %>%#
-				mutate(totals = formatC(round(total,0), format="fg", big.mark = ",")) %>%#
-				arrange(TripType, SpendType, POV_Group) %>% as.data.frame()#
-# ASSERT Total Spend for 2010 Q3 is 1700540403#
-stopifnot(as.integer(sum(df_rec_2010_Q3$total)) == 1700540403)#
+# P:\OTSP\SAS\DTS\Output\2010Q3\reports\Est_Qtr_Trip_Type_Purpose.xls #
+# The number of trips is 8,465,427#
 #
-# now we know that our numbers have integrity, we can join the two tables together.#
-# expecting 1050260 rows#
-df_trips_combined 	<- df_trips %>% #
-					inner_join(df_spend_combined, by = c("TripIDNumber" = "TripIDNumber"))
-head(df_trips_combined)
-df_trips_combined <- fn_create_year_end(df_trips_combined)
-nrow(df_trips_combined)
-head(df_trips_combined)
-# (3.1) create four data frames with unique year ending values#
+df_rec <- df_combined %>% filter(TripYear == 2010 & TripQtr == 3) %>% #
+			distinct(TripIDNumber) %>% summarise(total = sum(Total_Trips))#
+#
+stopifnot(round(df_rec$total, 0) == 8465427)#
+rm(df_rec)#
+#
+#========================================================================#
+#=============================================================================#
+# (2) CREATE a data frame of complete years. #
+# add 4 extra columns: (YEMar, YEJun, YESep, YEDec) These will be used in group by calculations #
+df_combined <- fn_create_year_end(df_combined)
+df_combined
+head(df_combined)
+# clear everything#
+rm(list = ls())#
+#
+# load some libaries #
+#library(lubridate)#
+library(dplyr)#
+library(stringr)#
+library(tidyr)#
+#
+options(stringsAsFactors = FALSE)#
+# do not display in scientific notation#
+options(scipen=999, digits = 10)#
+#
+setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
+#
+# calculates "length of stay"#
+#source('functions/fn_calc_los.R')#
+# creates a data.frame of column combinations for use in a group_by#
+source('functions/fn_create_column_combinations.R')#
+# uses column combinations to create various group_by#
+source('functions/fn_create_comb_aggregates.R')#
+# appends columns to a data.frame such that resultant df is always 8 columns wide#
+source('functions/fn_create_df_with_all.R')#
+# appends a data.frame with four columns#
+source('functions/fn_create_year_end.R')#
+# converts floating point number to text#
+source('functions/fn_convert_to_text.R')#
+# creates  yearend lookup table#
+source('functions/fn_create_YE_lookup.R')#
+# takes a dimension lookup and creates a dimension hierarchy#
+source('functions/fn_create_dim_hierarchy.R')#
+# this is a collection of statements that changes a few values so it can join with "df_purpose_lu"#
+source('functions/fn_clean_trips.R')#
+# this function cleans up "vw_DTSTripSpend.csv" It removes "alcohol" from "Food and Alcohol"#
+source('functions/fn_clean_spend.R')#
+# loads a prepares an activity classification table#
+source('functions/fn_get_classification.R')#
+# PREAMBLE (data relationships)#
+# relationship between df_trips & df_accomodation: a person makes a trip and...#
+# stays in accomodation. When a person makes a day trip there is no need for..#
+# accomodation. Therefore only "Overnight trips" are included #
+# A single trip can have multiple accomodation values as a person..#
+# can stay in different hotels in the same or different locations#
+# the data is quarterly data#
+#
+# PLAN OF ATTACK#
+# 1) load two CSV files #
+# 2) process the two CVS files#
+# 3) create a data frame of complete years (where the number of quarters = 4)#
+# 4) combine the two data frames and aggregate by: #
+#		a) year end (4 quarterly year ends) and#
+#		b) four dimension variables#
+# 5) aggregate data by: year end and 4 dimensions variables. Include full years only#
+# 6) create various aggregate combinations#
+#========================================================================#
+# (1) LOAD and Prepare data#
+# 1,a TRIPS#
+df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
+#
+# nrow 137,081#
+df_trips <- df_trips %>% #
+		select(TripIDNumber, TripYear, TripQtr, TripType, DestinationRTO, SmoothedTripWeight) %>%#
+		rename(Total_Trips = SmoothedTripWeight)#
+# 1.b ACTIVITIES#
+# This function gets an XL spreasheet and cleans some values so it matches with df_activities#
+df_activity_classification <- fn_get_classification()#
+#
+# nrow = 340,349#
+df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE) %>%#
+			select(-AnswerNumber, -LegNumber)#
+#
+# clean up a rogue value#
+df_activities[df_activities$Activities == "Business   " ,  "Activities"] <- "Business"#
+#
+# append activity group to df_activies#
+df_activities <- df_activities %>% #
+ 			inner_join(df_activity_classification, by = c("Activities" = "Activity")) %>%#
+ 			select(TripID, Activity_Group, Activities)#
+df_combined <- inner_join(df_trips, df_activities, by = c("TripIDNumber" = "TripID"))#
+#
+#========================================================================#
+#
+#========================================================================#
+# RECONCILIATION POINT. The following code snippet should reconcile to #
+# P:\OTSP\SAS\DTS\Output\2010Q3\reports\Est_Qtr_Trip_Type_Purpose.xls #
+# The number of trips is 8,465,427#
+#
+df_rec <- df_combined %>% filter(TripYear == 2010 & TripQtr == 3) %>% #
+			distinct(TripIDNumber) %>% summarise(total = sum(Total_Trips))#
+#
+stopifnot(round(df_rec$total, 0) == 8465427)#
+rm(df_rec)
+ls()
+rm(df_rec, df_activity_classification)
+df_combined <- fn_create_year_end(df_combined)#
+# (2.1) create four data frames with unique year ending values#
 df_YE_Mar <- df_trips_combined %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
 df_YE_Jun <- df_trips_combined %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
 df_YE_Sep <- df_trips_combined %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
-df_YE_Dec <- df_trips_combined %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)
+df_YE_Dec <- df_trips_combined %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
+# (3.2) stack the four data frames; include whole year values; select a single column#
+# df_YE_all contains a list of quarterly year ends for "complete" years. These are#
+# years which contain 4 quarters.#
+df_YE_all <- bind_rows(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec) %>%#
+			group_by(YE) %>% summarise(count = n()) %>% #
+			filter(count == 4) %>% select(YE)#
+# clean up			#
+rm(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec)#
+rm(df_purpose_lu, df_spend_combined, df_trip_spend, df_trips)
+df_YE_Mar <- df_combined %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
+df_YE_Jun <- df_combined %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
+df_YE_Sep <- df_combined %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
+df_YE_Dec <- df_combined %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)
 df_YE_all <- bind_rows(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec) %>%#
 			group_by(YE) %>% summarise(count = n()) %>% #
 			filter(count == 4) %>% select(YE)
-head(df_YE_all)
-rm(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec)
-ls(0)
-ls()
+# clean up			#
+rm(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec)#
 rm(df_purpose_lu, df_spend_combined, df_trip_spend, df_trips)
-head(df_trips_combined)
-df_trips_qtrly <- df_trips_combined %>%  #
-	group_by(YEDec, YESep, YEJun, YEMar, Destination_RTO, Trip_Type, POV, POV_Group, SpendType) %>%#
-	summarise(Expenditure = sum(Expenditure))
-df_trips_qtrly <- df_trips_combined %>%  #
-	rename(Destination_RTO = DestinationRTO, Trip_Type = TripType, Spend_Type = SpendType) %>%#
-	group_by(YEDec, YESep, YEJun, YEMar, Destination_RTO, Trip_Type, POV, POV_Group, Spend_Type) %>%#
-	summarise(Expenditure = sum(Expenditure))
-head(df_trips_qtrly)
-head(df_trips_qtrly)
-df_trips_qtrly <- df_trips_combined %>%  #
-	rename(Destination_RTO = DestinationRTO, Trip_Type = TripType, Spend_Type = SpendType) %>%#
-	group_by(YEDec, YESep, YEJun, YEMar, Destination_RTO, Trip_Type, POV, POV_Group, Spend_Type) %>%#
-	summarise(Total_Expenditure = sum(Expenditure))
-head(df_trips_qtrly)
-nrow(df_trips_qtrly)
-YE <- c(df_trips_qtrly$YEDec, df_trips_qtrly$YESep, df_trips_qtrly$YEJun, df_trips_qtrly$YEMar)#
-#
-# (5.2) duplicate the same dataframe four times and stack on top of each other#
-df_four_quarters <- rbind(df_trips_qtrly, df_trips_qtrly, df_trips_qtrly, df_trips_qtrly)#
-#
-df_base_aggregates <- cbind(YE, df_four_quarters) %>%#
-	select(-c(YEDec, YESep, YEJun, YEMar))  %>%#
-	group_by(YE, Destination_RTO, Trip_Type, POV, POV_Group, Trip_Type, Spend_Type) %>%#
-	summarise(Expenditure = sum(Expenditure))  %>%  #
-	filter(YE %in% df_YE_all$YE)
-df_base_aggregates <- cbind(YE, df_four_quarters) %>%#
-	select(-c(YEDec, YESep, YEJun, YEMar))
-head(df_base_aggregates)
-df_trips_qtrly <- df_trips_combined %>%  #
-	rename(Destination_RTO = DestinationRTO, Trip_Type = TripType, Spend_Type = SpendType) %>%#
-	group_by(YEDec, YESep, YEJun, YEMar, Destination_RTO, Trip_Type, POV, POV_Group, Spend_Type) %>%#
-	summarise(Expenditure = sum(Expenditure))
-YE <- c(df_trips_qtrly$YEDec, df_trips_qtrly$YESep, df_trips_qtrly$YEJun, df_trips_qtrly$YEMar)#
-#
-# (5.2) duplicate the same dataframe four times and stack on top of each other#
-df_four_quarters <- rbind(df_trips_qtrly, df_trips_qtrly, df_trips_qtrly, df_trips_qtrly)#
-#
-df_base_aggregates <- cbind(YE, df_four_quarters) %>%#
-	select(-c(YEDec, YESep, YEJun, YEMar))  %>%#
-	group_by(YE, Destination_RTO, Trip_Type, POV, POV_Group, Trip_Type, Spend_Type) %>%#
-	summarise(Expenditure = sum(Expenditure))  %>%  #
-	filter(YE %in% df_YE_all$YE)
-head(df_base_aggregates)
-aa <- df_base_aggregates %>% filter(YE == "YESep1999")
-nrow(aa)
-unique(df_base_aggregates$YE)
-aa <- df_base_aggregates %>% filter(YE == "YESep2010")
-nrow(aa)
-head(df_base_aggregates)
-aa <- df_base_aggregates %>% filter(YE == "YESep2010") %>% #
-	group_by(Trip_Type) %>% summarise(total = sum(Expenditure))
-aa
-df_base_aggregates %>% filter(YE == "YESep2010") %>%  group_by(Trip_Type) %>% summarise(total = sum(Expenditure))
-temp_a 	<- df_base_aggregates %>% filter(YE == "YESep2010") %>% #
-				group_by(Trip_Type) %>% summarise(total = sum(Expenditure))#
-temp_b <- df_base_aggregates %>% filter(YE == "YESep2010") %>% #
-				group_by(Trip_Type) %>% summarise(total = sum(Expenditure))
-temp_b
-temp_b <- df_base_aggregates %>% filter(YE == "YESep2010") %>% #
-				group_by(POV_Group) %>% summarise(total = sum(Expenditure))
-temp_b
-temp_b <- df_base_aggregates %>% filter(YE == "YESep2010") %>% #
-				group_by(POV_Group) %>% summarise(total = sum(Expenditure)) %>%#
-				mutate(totals = formatC(round(total,0), format="fg", big.mark = ","))
-temp_b
-sum(temp_b$total)
-head(df_base_aggregates)
-# (6.1) get the dimenions names#
-vct_dim_names <- names(df_base_aggregates)[1:6]#
-#
-# get measure names#
-vct_measure_names <- names(df_base_aggregates)[7]
+# (2) CREATE a data frame of complete years. #
+# add 4 extra columns: (YEMar, YEJun, YESep, YEDec) These will be used in group by calculations #
+df_combined <- fn_create_year_end(df_combined)#
+# (2.1) create four data frames with unique year ending values#
+df_YE_Mar <- df_combined %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
+df_YE_Jun <- df_combined %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
+df_YE_Sep <- df_combined %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
+df_YE_Dec <- df_combined %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
+# (3.2) stack the four data frames; include whole year values; select a single column#
+# df_YE_all contains a list of quarterly year ends for "complete" years. These are#
+# years which contain 4 quarters.#
+df_YE_all <- bind_rows(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec) %>%#
+			group_by(YE) %>% summarise(count = n()) %>% #
+			filter(count == 4) %>% select(YE)#
+# clean up			#
+rm(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec)
+# (2) CREATE a data frame of complete years. #
+# add 4 extra columns: (YEMar, YEJun, YESep, YEDec) These will be used in group by calculations #
+df_combined <- fn_create_year_end(df_combined)#
+# (2.1) create four data frames with unique year ending values#
+df_YE_Mar <- df_combined %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
+df_YE_Jun <- df_combined %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
+df_YE_Sep <- df_combined %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
+df_YE_Dec <- df_combined %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
+# (3.2) stack the four data frames; include whole year values; select a single column#
+# df_YE_all contains a list of quarterly year ends for "complete" years. These are#
+# years which contain 4 quarters.#
+df_YE_all <- bind_rows(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec) %>%#
+			group_by(YE) %>% summarise(count = n()) %>% #
+			filter(count == 4) %>% select(YE)#
+# clean up			#
+rm(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec)
+head(df_combined)
