@@ -3,7 +3,7 @@ fn_get_classification <- function() {
 # binary format of the spreadsheet changed from XLS to XLXS
 
 	
-	library(xlsx)
+	
 	
 	df_class <- read.xlsx('inputs/ivs_activities_classification.xlsx', 
 						sheetIndex = 3, rowIndex = 2:143, colIndex = 2:5)
