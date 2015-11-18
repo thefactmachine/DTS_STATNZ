@@ -26,7 +26,8 @@ fn_create_YE_lookup <- function(a_vctYE) {
 				mutate(Code = 1:n()) %>% 
 				mutate(Description = paste0("YE", month, " ", year)) %>%
 				select(-c(year, month, qtr)) %>%
-				mutate(SortOrder = Code)
+				mutate(SortOrder = Code) 
+
 	
 	nr <- nrow(df_year)
 	

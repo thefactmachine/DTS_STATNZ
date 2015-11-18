@@ -29,6 +29,10 @@ source('functions/fn_create_YE_lookup.R')
 # takes a dimension lookup and creates a dimension hierarchy
 source('functions/fn_create_dim_hierarchy.R')
 
+# takes a character vector and surrounds it with quotes hi --> "hi"
+source('functions/fn_quote.R')
+
+
 
 
 
@@ -171,7 +175,7 @@ rm(df_combined, df_four_quarters, df_YE_all, YE)
 
 
 # (6.1) get the dimenions names
-vct_dim_names <- c("YE", "LOS_Group", "Destination_RTO", "Accomodation_Type")
+vct_dim_names <- c("YE", "LOS_Group", "Destination_RTO", "Accommodation_Type")
 
 names(df_base_aggregates)[1:4] <- vct_dim_names
 
@@ -231,12 +235,20 @@ df_fin <- sapply(df_consolidated[, vct_measure_names], function(x) fn_convert_to
 rm(df_base_aggregates, df_totals, df_aggregations, lst_combinations)
 rm(fn_convert_to_text)
 
+
+
+
+
 #=============================================================================
 # (8) LOOKUPS
 # (8.1) import lookup tables and create lookup for year end
 df_lu_acccom_type <- read.csv("inputs/DimenLookupAccommodationTypeAccommodation.csv", header = TRUE)
 df_lu_dest_rto <- read.csv("inputs/DimenLookupDestinationRTOAccommodation.csv", header = TRUE)
 df_lu_LOS <- read.csv("inputs/DimenLookupLOS_groupAccommodation.csv", header = TRUE)
+
+
+
+source('functions/fn_create_YE_lookup.R')
 
 df_lu_YE <- fn_create_YE_lookup(df_fin$YE) %>% as.data.frame()
 
@@ -251,7 +263,7 @@ df_fin_lu <- df_fin %>%
 			mutate(DestinationRTO = Code) %>% 
 			select(-c(Code, SortOrder)) %>%
 		
-			inner_join(df_lu_acccom_type, by = c("Accomodation_Type" = "Description")) %>% 
+			inner_join(df_lu_acccom_type, by = c("Accommodation_Type" = "Description")) %>% 
 			mutate(Accommodation_Type = Code) %>% 
 			select(-c(Code, SortOrder)) %>%
  		
@@ -261,6 +273,9 @@ df_fin_lu <- df_fin %>%
 		
 			rename(Year_ending = YE) %>%
 			as.data.frame()
+
+
+
 			
 			
 # (8.3) create dimension hierarchy from dimension lookups in 8.1
@@ -269,20 +284,48 @@ df_dh_dest_rto <- fn_create_dim_hierarchy(df_lu_dest_rto)
 df_dh_LOS <- fn_create_dim_hierarchy(df_lu_LOS)
 df_dh_YE <- fn_create_dim_hierarchy(df_lu_YE)
 
-# (8.4) create Dimension and Measure Index df's
+
+
+# (8.3.1) surround character columns with quotes
+df_lu_acccom_type$Description <- fn_quote(df_lu_acccom_type$Description)
+df_lu_dest_rto$Description <- fn_quote(df_lu_dest_rto$Description)
+df_lu_LOS$Description <- fn_quote(df_lu_LOS$Description)
+df_lu_YE$Description <- fn_quote(df_lu_YE$Description)
+
+
+
+
+# (8.3.2) Set sort order to blank
+df_lu_acccom_type$SortOrder <- "" 
+df_lu_dest_rto$SortOrder <- ""
+df_lu_LOS$SortOrder <- ""
+df_lu_YE$SortOrder <- ""
+
+
+# (8.3.3) Drop YE columns...we used it for a join but not needed anymore
+df_lu_YE$YE <- NULL
+
+
+
+
+
+
+
+# (8.4) create Dimension and Measure Index df's fn_quote() surounds with "
 df_dimension_index <- 
-		data.frame(DimensionCode = vct_dim_names, 
-		DimensionTitle = gsub("_", " ", vct_dim_names))
+		data.frame(DimensionCode = fn_quote(vct_dim_names), 
+		DimensionTitle = fn_quote(gsub("_", " ", vct_dim_names)))
+
 
 df_measure_index <-
-		data.frame(MeasureCode = vct_measure_names, 
-		MeasureTitle = gsub("_", " ", vct_measure_names))
+		data.frame(MeasureCode = fn_quote(vct_measure_names), 
+		MeasureTitle = fn_quote(gsub("_", " ", vct_measure_names)))
 
 
 # (8.5) create file index data frame
-df_file_index <- data.frame(TableID = "Accomodation",
-							TableCode = "TABLECODEAccomodation",
-							TableTitle = "Domestic Travel Survey: Accomodation",
+df_file_index <- data.frame(TableID = "7578",
+							TableCode = "TABLECODE7578",
+							TableTitle = "Domestic Travel Survey: Accommodation",
 							TableFileName = "",
 							TableURL = "")
 
@@ -294,6 +337,8 @@ rm(df_consolidated, fn_create_dim_hierarchy, fn_create_YE_lookup)
 # (9.1) prepare a list containing all dataframes (to be csv files) that will be output
 # the order doesn't matter...but for the sake of accuracy, lets impose some structure:
 # data, dimension_lookups, dimension_hierarchies, indexes (dimension, measure, file)
+
+
 
 lst_output <- list(df_fin_lu, 
 				df_lu_YE, df_lu_LOS, df_lu_dest_rto, df_lu_acccom_type,
@@ -307,15 +352,23 @@ rm(df_dh_acccom_type, df_dh_dest_rto, df_dh_LOS, df_dh_YE,
 # (9.2) give the list some meaningful names that will be used as file names
 # use the information contained in the previous data.frames to encourage consistency
 
-data_name <- paste0("data", df_file_index$TableID)
 
+
+data_name <- paste0("Data", df_file_index$TableID)
+
+# gsub is to convert from names with underscores to camelCase. Also replace quotes (i.e " with blanks)
 vct_dimension_names <- 
-	paste0("DimenLookup", df_dimension_index$DimensionCode, df_file_index$TableID)
+	paste0("DimenLookup", gsub("(\"|_)","",df_dimension_index$DimensionCode), df_file_index$TableID)
 
+
+# gsub is to convert from names with underscores to camelCase. Also replace quotes (i.e " with blanks)
 vct_hierarchy_names <- 
-	paste0("DimHierarchy", df_dimension_index$DimensionCode, df_file_index$TableID)
+	paste0("DimenHierarchy", gsub("(\"|_)", "", df_dimension_index$DimensionCode), df_file_index$TableID)
+	
 
 vct_index_names <- c("DimensionIndex", "MeasureIndex", "FileIndex")
+
+
 
 # assemble the above into a single vector and assign to the list
 vct_list_names <- c(data_name, vct_dimension_names, vct_hierarchy_names, vct_index_names) 
@@ -326,10 +379,9 @@ rm(data_name, vct_dim_names, vct_hierarchy_names, vct_dimension_names,
 		vct_index_names, vct_list_names, vct_measure_names)
 
 
-
 # (9.3) prepare / create output directory
 
-sub_path_to_output <- paste0("outputs", "/", df_file_index$TableID)
+sub_path_to_output <- paste0("outputs", "/", "Table_", df_file_index$TableID)
 curr_path <- getwd()
 
 # if the file path does not exist then create it
@@ -347,6 +399,8 @@ invisible(lapply(seq_along(lst_output),
 			write.table(lst_output[[i]], full_file_name, sep = ",", 
 				row.names = FALSE, quote = FALSE)
 		}))
+		
+		
 # clean up
 rm(curr_path, df_dimension_index, df_file_index, df_measure_index, 
 		lst_output, str_full_path, sub_path_to_output)
@@ -356,14 +410,6 @@ rm(curr_path, df_dimension_index, df_file_index, df_measure_index,
 
 
 
-
-
-
-
-
-
-# clean up
-rm(df_consolidated, fn_create_YE_lookup)
 
 
 
