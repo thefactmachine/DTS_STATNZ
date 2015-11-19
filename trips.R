@@ -29,6 +29,9 @@ source('functions/fn_create_YE_lookup.R')
 # takes a dimension lookup and creates a dimension hierarchy
 source('functions/fn_create_dim_hierarchy.R')
 
+# takes a character vector and surrounds it with quotes hi --> "hi"
+source('functions/fn_quote.R')
+
 
 
 
@@ -186,16 +189,21 @@ df_base_aggregates <- cbind(YE, df_four_quarters) %>%
 
 
 # (6.1) get the dimenions names
-vct_dim_names <- names(df_base_aggregates)[1:5]
 
-# get measure names
-vct_measure_names <- names(df_base_aggregates)[6:8]
+vct_dim_names <- c("Year_Ending", "Destination_RTO", "Trip_Type", "POV", "POV_Group")
+ names(df_base_aggregates)[1:5] <- vct_dim_names
 
+
+vct_measure_names <- c("Total_Visitors", "Total_Trips", "Total_Respondents")
+names(df_base_aggregates)[6:8] <- vct_measure_names
 
 # (6.2) create a "summarise" clause (for multiple use later)
 lst_aggregations <- as.list(paste0("sum(", vct_measure_names,")"))
 
+
 lst_sum_clause <- setNames(lst_aggregations, vct_measure_names)
+
+
 
 # (6.3) sort order of the columns
 vct_col_sort <- c(vct_dim_names, vct_measure_names)
@@ -224,7 +232,6 @@ df_totals <- df_base_aggregates %>% ungroup() %>%
 				summarise_(.dots = lst_sum_clause) %>% 
 				fn_create_df_with_all(vct_dim_names, vct_col_sort)
 
-
 # clean up
 rm(fn_create_column_combinations, fn_create_comb_aggregates, fn_create_df_with_all)
 rm(fn_create_year_end, lst_aggregations, lst_sum_clause, vct_col_sort)
@@ -243,7 +250,7 @@ df_consolidated <- bind_rows(df_base_aggregates, df_aggregations, df_totals)
 # df_aggregations %>% filter(YE == "YEDec2010" & LOS_Group == "All" 
 # & DestinationRTO == "All" & AccommodationType == "All")
 
-
+stopifnot(sum(is.na(df_consolidated)) == 0)
 
 # (7.1) convert numeric columns to text with 0 decimal places
 df_fin <- sapply(df_consolidated[, vct_measure_names], function(x) fn_convert_to_text(x)) %>%
@@ -287,7 +294,7 @@ rm(vct_Trip_desc, vct_codes)
 df_lu_dest_rto <- read.csv("inputs/DimenLookupDestinationRTOAccommodation.csv", header = TRUE)
 
 # (8.5) Finally create YE Look ups
-df_lu_YE <- fn_create_YE_lookup(df_fin$YE) %>% as.data.frame()
+df_lu_YE <- fn_create_YE_lookup(df_fin$Year_Ending) %>% as.data.frame()
 
 # We get the lookups and the dataset and replace the original string values with numeric values 
 # in the lookups:
@@ -298,10 +305,9 @@ df_lu_YE <- fn_create_YE_lookup(df_fin$YE) %>% as.data.frame()
 
 df_fin_lu <- df_fin %>% 
 
-			inner_join(df_lu_YE, by = c("YE" = "YE")) %>% 
-			mutate(YE = Code) %>% 
+			inner_join(df_lu_YE, by = c("Year_Ending" = "YE")) %>% 
+			mutate(Year_Ending = Code) %>% 
 			select(-c(Code, SortOrder, Description)) %>%		
-			rename(Year_ending = YE) %>%
 			
 			inner_join(df_lu_dest_rto, by = c("Destination_RTO" = "Description")) %>% 
 			mutate(Destination_RTO = Code) %>% 
@@ -333,31 +339,57 @@ df_dh_POV <- fn_create_dim_hierarchy(df_lu_POV)
 df_dh_POV_Group <- fn_create_dim_hierarchy(df_lu_POV_Group)
 
 
+#  surround character columns with quotes
+df_lu_YE$Description <- fn_quote(df_lu_YE$Description)
+df_lu_dest_rto$Description <- fn_quote(df_lu_dest_rto$Description) 
+df_lu_Trip_Type$Description <- fn_quote(df_lu_Trip_Type$Description)
+df_lu_POV$Description <- fn_quote(df_lu_POV$Description) 
+df_lu_POV_Group$Description <- fn_quote(df_lu_POV_Group$Description)
+
+
+# Set sort order to blank
+df_lu_YE$SortOrder <-  ""
+df_lu_dest_rto$SortOrder <- ""
+df_lu_Trip_Type$SortOrder <- ""
+df_lu_POV$SortOrder <-  ""
+df_lu_POV_Group$SortOrder <- ""
+
+
+#  Drop YE columns...we used it for a join but not needed anymore
+df_lu_YE$YE <- NULL
+
 
 # (8.7) create Dimension and Measure Index df's
+vct_dim_title <- c("Year ending", "Regional tourism organisation", 
+		"Trip type", "Purpose of visit", "Purpose of visit group")
+
+vct_dim_title <- fn_quote(vct_dim_title)
+
+
 df_dimension_index <- 
-		data.frame(DimensionCode = vct_dim_names, 
-		DimensionTitle = gsub("_", " ", vct_dim_names))
+		data.frame(DimensionCode = fn_quote(vct_dim_names), 
+		DimensionTitle = vct_dim_title)
+
+
+
+vct_measure_title <- c("Total visitors", "Total trips", "Total respondents")
+vct_measure_title <- fn_quote(vct_measure_title)
 
 df_measure_index <-
-		data.frame(MeasureCode = vct_measure_names, 
-		MeasureTitle = gsub("_", " ", vct_measure_names))
-
-
-
-
-
+		data.frame(MeasureCode = fn_quote(vct_measure_names), 
+		MeasureTitle = vct_measure_title)
 
 
 # (8.8) create file index data frame
-df_file_index <- data.frame(TableID = "Trips",
-							TableCode = "TABLECODETrips",
+df_file_index <- data.frame(TableID = "7581",
+							TableCode = "TABLECODE7581",
 							TableTitle = "Domestic Travel Survey: Trips",
 							TableFileName = "",
 							TableURL = "")
 
 # clean up
 rm(df_consolidated, fn_create_dim_hierarchy, fn_create_YE_lookup)
+
 
 #=============================================================================
 # (9)  FILE OUTPUT
@@ -379,7 +411,6 @@ lst_output <- 	list(
 				# the indexes (dimension, measure and then file)
 				df_dimension_index, df_measure_index, df_file_index)
 
-
 # clean up
 rm(df_fin_lu, df_lu_POV_Group, df_lu_POV, df_lu_Trip_Type, df_lu_dest_rto, 
 df_lu_YE, df_dh_POV_Group, df_dh_POV, df_dh_Trip_Type, df_dh_dest_rto, df_dh_YE)
@@ -387,34 +418,35 @@ df_lu_YE, df_dh_POV_Group, df_dh_POV, df_dh_Trip_Type, df_dh_dest_rto, df_dh_YE)
 # (9.2) give the list some meaningful names that will be used as file names
 # use the information contained in the previous data.frames to encourage consistency
 
-data_name <- paste0("data", df_file_index$TableID)
+data_name <- paste0("Data", df_file_index$TableID)
 
-vct_dimension_names <- 
-	paste0("DimenLookup", df_dimension_index$DimensionCode, df_file_index$TableID)
+vct_dimension_file_names <- 
+	paste0("DimenLookup", gsub("(\"|_)","",df_dimension_index$DimensionCode), df_file_index$TableID)
 
-	
-vct_hierarchy_names <- 
-	paste0("DimHierarchy", df_dimension_index$DimensionCode, df_file_index$TableID)
+vct_hierarchy_file_names <- 
+	paste0("DimenHierarchy", gsub("(\"|_)", "", df_dimension_index$DimensionCode), df_file_index$TableID)
+
 
 # these are always the same
 vct_index_names <- c("DimensionIndex", "MeasureIndex", "FileIndex")
 
-
 # assemble the above into a single vector and assign to the list
-vct_list_names <- c(data_name, vct_dimension_names, vct_hierarchy_names, vct_index_names) 
+vct_list_names <- c(data_name, vct_dimension_file_names, vct_hierarchy_file_names, vct_index_names)
 
 names(lst_output) <- vct_list_names
 
-
 # clean up
-rm(data_name, vct_dim_names, vct_hierarchy_names, vct_dimension_names, 
+rm(data_name, vct_dim_names, vct_hierarchy_file_names , vct_dimension_file_names, 
 		vct_index_names, vct_list_names, vct_measure_names)
 
 
 
-# (9.3) prepare / create output directory
 
-sub_path_to_output <- paste0("outputs", "/", df_file_index$TableID)
+
+# (9.3) prepare / create output directory
+sub_path_to_output <- paste0("outputs", "/", "Table_", df_file_index$TableID)
+
+
 curr_path <- getwd()
 str_full_path <- file.path(curr_path, sub_path_to_output)
 
@@ -431,6 +463,9 @@ invisible(lapply(seq_along(lst_output),
 			write.table(lst_output[[i]], full_file_name, sep = ",", 
 				row.names = FALSE, quote = FALSE)
 		}))
+
+
+
 
 
 # clean up

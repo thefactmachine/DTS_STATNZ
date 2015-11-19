@@ -173,19 +173,17 @@ rm(df_combined, df_four_quarters, df_YE_all, YE)
 # the remaining 15 combinations are created below.  Of these 15 combinations, 14 are created
 # programmatically (see 6.5). The remaining combination is created as a single line of code (see 6.6)
 
-
 # (6.1) get the dimenions names
-vct_dim_names <- c("YE", "LOS_Group", "Destination_RTO", "Accommodation_Type")
-
+vct_dim_names <- c("Year_Ending", "LOS_Group", "Destination_RTO", "Accommodation_Type")
 names(df_base_aggregates)[1:4] <- vct_dim_names
 
+vct_measure_names <- c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents")
+names(df_base_aggregates)[5:8] <- vct_measure_names
 
 
 # (6.2) create a "summarise" clause (for multiple use later)
-lst_aggregations <- list("sum(Total_Visitors)", "sum(Total_Trips)", 
-	"sum(Total_Nights)", "sum(Total_Respondents)")
+lst_aggregations <- as.list(paste0("sum(", vct_measure_names,")"))
 
-vct_measure_names <- c("Total_Visitors", "Total_Trips", "Total_Nights", "Total_Respondents")
 
 lst_sum_clause <- setNames(lst_aggregations, vct_measure_names)
 
@@ -222,6 +220,9 @@ df_consolidated <- bind_rows(df_base_aggregates, df_aggregations, df_totals)
 # df_aggregations %>% filter(YE == "YEDec2010" & LOS_Group == "All" 
 # & DestinationRTO == "All" & AccommodationType == "All")
 
+# ASSERT: No NAs bave been introduced before converting to text.
+stopifnot(sum(is.na(df_consolidated)) == 0)
+
 
 
 # (7.1) convert numeric columns to text with 0 decimal places
@@ -230,6 +231,10 @@ df_fin <- sapply(df_consolidated[, vct_measure_names], function(x) fn_convert_to
  			as.data.frame() %>%
  			# club the original columns together with the new text columns
  			bind_cols(df_consolidated[, vct_dim_names, ], .)
+
+
+
+
 
 #clean up
 rm(df_base_aggregates, df_totals, df_aggregations, lst_combinations)
@@ -247,10 +252,13 @@ df_lu_dest_rto <- read.csv("inputs/DimenLookupDestinationRTOAccommodation.csv", 
 df_lu_LOS <- read.csv("inputs/DimenLookupLOS_groupAccommodation.csv", header = TRUE)
 
 
+df_lu_YE <- fn_create_YE_lookup(df_fin$Year_Ending) %>% as.data.frame()
 
-source('functions/fn_create_YE_lookup.R')
 
-df_lu_YE <- fn_create_YE_lookup(df_fin$YE) %>% as.data.frame()
+
+
+
+
 
 # (8.2) based on the lookup tables created, replace string values with numeric lookups for the...
 # 4 dimensions
@@ -260,18 +268,16 @@ df_fin_lu <- df_fin %>%
 			select(-c(Code, SortOrder)) %>% 
 		
 			inner_join(df_lu_dest_rto, by = c("Destination_RTO" = "Description")) %>% 
-			mutate(DestinationRTO = Code) %>% 
+			mutate(Destination_RTO = Code) %>% 
 			select(-c(Code, SortOrder)) %>%
 		
 			inner_join(df_lu_acccom_type, by = c("Accommodation_Type" = "Description")) %>% 
 			mutate(Accommodation_Type = Code) %>% 
 			select(-c(Code, SortOrder)) %>%
  		
- 			inner_join(df_lu_YE, by = c("YE" = "YE")) %>% 
-			mutate(YE = Code) %>% 
+ 			inner_join(df_lu_YE, by = c("Year_Ending" = "YE")) %>% 
+			mutate(Year_Ending = Code) %>% 
 			select(-c(Code, SortOrder, Description)) %>%   
-		
-			rename(Year_ending = YE) %>%
 			as.data.frame()
 
 
@@ -308,18 +314,30 @@ df_lu_YE$YE <- NULL
 
 
 
-
-
-
 # (8.4) create Dimension and Measure Index df's fn_quote() surounds with "
+# (8.4.1) Dimension Index
+
+vct_dim_title <- c("Year ending", "Length of stay", 
+		"Regional tourism organisation", "Accommodation type")
+vct_dim_title <- fn_quote(vct_dim_title)
+
 df_dimension_index <- 
 		data.frame(DimensionCode = fn_quote(vct_dim_names), 
-		DimensionTitle = fn_quote(gsub("_", " ", vct_dim_names)))
+		DimensionTitle = vct_dim_title)
+
+
+
+# (8.4.2) Measure Index
+vct_measure_title <- c("Total visitors", "Total trips", "Total nights", "Total respondents")
+vct_measure_title <- fn_quote(vct_measure_title)
 
 
 df_measure_index <-
 		data.frame(MeasureCode = fn_quote(vct_measure_names), 
-		MeasureTitle = fn_quote(gsub("_", " ", vct_measure_names)))
+		MeasureTitle = vct_measure_title)
+
+
+
 
 
 # (8.5) create file index data frame
@@ -356,13 +374,14 @@ rm(df_dh_acccom_type, df_dh_dest_rto, df_dh_LOS, df_dh_YE,
 
 data_name <- paste0("Data", df_file_index$TableID)
 
+
 # gsub is to convert from names with underscores to camelCase. Also replace quotes (i.e " with blanks)
-vct_dimension_names <- 
+vct_dimension_file_names <- 
 	paste0("DimenLookup", gsub("(\"|_)","",df_dimension_index$DimensionCode), df_file_index$TableID)
 
 
 # gsub is to convert from names with underscores to camelCase. Also replace quotes (i.e " with blanks)
-vct_hierarchy_names <- 
+vct_hierarchy_file_names <- 
 	paste0("DimenHierarchy", gsub("(\"|_)", "", df_dimension_index$DimensionCode), df_file_index$TableID)
 	
 
@@ -371,11 +390,11 @@ vct_index_names <- c("DimensionIndex", "MeasureIndex", "FileIndex")
 
 
 # assemble the above into a single vector and assign to the list
-vct_list_names <- c(data_name, vct_dimension_names, vct_hierarchy_names, vct_index_names) 
+vct_list_names <- c(data_name, vct_dimension_file_names, vct_hierarchy_file_names, vct_index_names) 
 names(lst_output) <- vct_list_names
 
 # clean up
-rm(data_name, vct_dim_names, vct_hierarchy_names, vct_dimension_names, 
+rm(data_name, vct_dim_names, vct_hierarchy_file_names, vct_dimension_file_names, 
 		vct_index_names, vct_list_names, vct_measure_names)
 
 
