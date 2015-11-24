@@ -134,6 +134,12 @@ df_base_aggregates <- cbind(YE, df_four_quarters) %>%
 			Total_Respondents = sum(Total_Respondents))  %>%  
 	filter(YE %in% df_YE_all$YE)
 
+
+
+
+
+
+
 # RECONCILIATION POINT. df_base_aggregates contains quarterly year ending values
 # this means that each row is the sum of 4 quarters.  To reconcile these, four source
 # files were aggregated. The four source files were:

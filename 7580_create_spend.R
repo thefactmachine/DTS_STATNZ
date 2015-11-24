@@ -31,8 +31,10 @@ source('functions/fn_create_comb_aggregates.R')
 source('functions/fn_create_df_with_all.R')
 # appends a data.frame with four columns
 source('functions/fn_create_year_end.R')
-# converts floating point number to text
-source('functions/fn_convert_to_text.R')
+
+# converts floating point number to text with two decimals
+source('functions/fn_convert_to_text_two_decimals.R')
+
 # creates  yearend lookup table
 source('functions/fn_create_YE_lookup.R')
 # takes a dimension lookup and creates a dimension hierarchy
@@ -139,6 +141,7 @@ df_base_aggregates <- cbind(YE, df_four_quarters) %>%
 	summarise(Expenditure = sum(Expenditure))  %>%  
 	filter(YE %in% df_YE_all$YE)
 
+
 #=============================================================================
 # RECONCILIATION POINT. df_base_aggregates contains quarterly year ending values
 # this means that each row is the sum of 4 quarters.  To reconcile these, four source
@@ -158,7 +161,7 @@ temp_b <- df_base_aggregates %>% filter(YE == "YESep2010") %>%
 				group_by(POV_Group) %>% summarise(total = sum(Expenditure))
 				
 # ASSERT: minimal differences between temp_a and temp_b
-stopifnot((sum(temp_a$total) - sum(temp_a$total)) < 0.5)
+stopifnot((sum(temp_a$total) - sum(temp_b$total)) < 0.5)
 # ASSERT that totals are approximately equal to 8,486,492,593
 stopifnot((sum(temp_a$total) - 8486492593) < 0.5)
 rm(temp_a, temp_b)
@@ -226,12 +229,15 @@ rm(fn_create_year_end, lst_aggregations, lst_sum_clause, vct_col_sort)
 # combine all aggregates into a single data frame
 df_consolidated <- bind_rows(df_base_aggregates, df_aggregations, df_totals)
 
+
+
+
 # ASSERT: No NAs bave been introduced before converting to text.
 stopifnot(sum(is.na(df_consolidated)) == 0)
 
 
 # Convert numeric columns to text with 0 decimal places
-df_fin <- sapply(df_consolidated[, vct_measure_names], function(x) fn_convert_to_text(x)) %>%
+df_fin <- sapply(df_consolidated[, vct_measure_names], function(x) fn_convert_to_text_two_decimals(x)) %>%
  			# convert sapply's matrix to a data frame
  			as.data.frame() %>%
  			# club the original columns together with the new text columns
@@ -239,7 +245,7 @@ df_fin <- sapply(df_consolidated[, vct_measure_names], function(x) fn_convert_to
 
 #clean up. Leave "df_consolidated" available for reconciliation purposes.
 rm(df_base_aggregates, df_totals, df_aggregations, lst_combinations)
-rm(fn_convert_to_text)
+rm(fn_convert_to_text_two_decimals)
 
 
 

@@ -153,14 +153,19 @@ df_base_aggregates <- cbind(YE, df_four_quarters) %>%
 # P:\OTSP\SAS\DTS\Output\2010Q4\reports\Est_Qtr_Nights_Accom_Type.xls [ total  = 10362275 ]
 # Total of the above are: 47421565 
 
-df_chk_total <- df_base_aggregates %>%
- 					ungroup() %>% filter(YE == "YEDec2010") %>% 
- 					summarise(nights = sum(Total_Nights))
+df_test_totals <- df_base_aggregates %>% 
+					filter(YE == "YEDec2010")  %>% ungroup() %>%
+					summarise_each(funs(sum), Total_Visitors, Total_Trips, 
+						Total_Nights, Total_Respondents)
+
 # ASSERT: total nights for year ending 2010Q4 are the same as SAS reports
-stopifnot(as.integer(df_chk_total) == 47421565)
+stopifnot(as.integer(df_test_totals$Total_Nights) == 47421565)
 
 # clean up
 rm(df_combined, df_four_quarters, df_YE_all, df_chk_total)
+
+
+
 
 #=============================================================================
 # CREATE various aggregate combinations
@@ -353,6 +358,20 @@ invisible(lapply(seq_along(lst_output),
 			write.table(lst_output[[i]], full_file_name, sep = ",", 
 				row.names = FALSE, quote = FALSE)
 		}))
+		
+		
+
+# compare outputs
+# the first is the sum of the text columns		
+lst_output$Data7578 %>% filter(Year_Ending == 45 & LOS_Group != 20 & 
+			Destination_RTO != 34 & Accommodation_Type != 35) %>%
+			mutate(tv = as.numeric(Total_Visitors), tt = as.numeric(Total_Trips),
+			tn = as.numeric(Total_Nights), tr = as.numeric(Total_Respondents)) %>%
+			summarise_each(funs(sum), tv, tt, tn, tr)
+			
+# the second is the sum of the numeric columns			
+df_test_totals
+
 		
 # clean up
 rm(curr_path, df_dimension_index, df_file_index, df_measure_index, 

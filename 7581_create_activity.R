@@ -153,6 +153,8 @@ df_base_aggregates <- cbind(YE, df_four_quarters) %>%
 	group_by(YE, Activity_Group) %>%
 	summarise(Total_Activities = sum(Total_Activities), Raw_Count = sum(Raw_Count))  %>%  
 	filter(YE %in% df_YE_all$YE)
+
+
 	
 #=============================================================================
 #=============================================================================
@@ -256,6 +258,9 @@ rm(fn_create_year_end, lst_aggregations, lst_sum_clause, vct_col_sort)
 
 # Combine all aggregates into a single data frame
 df_consolidated <- bind_rows(df_base_aggregates, df_aggregations, df_totals)
+
+
+
 
 # ASSERT: No NAs bave been introduced before converting to text.
 stopifnot(sum(is.na(df_consolidated)) == 0)
