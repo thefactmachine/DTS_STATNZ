@@ -7,10 +7,11 @@
 ##    Author: 		   	Mark Hatcher (Sector Trends, December, 2015)
 ##					 	Using code snippets and algorithms used for exporting IVS data export
 ##						(see P:\OTSP\IVS\5.Dissemination\Quarterly_production_code\IVS_NZ.stat)
-##  
+##   
+##	 Called by:			integrate.R
 
-# clear everything
-rm(list = ls())
+# clear everything except location of current directory.
+rm(list = ls()[!(ls() %in% c("str_cur_dir"))])
 
 # load some libaries 
 library(dplyr)
@@ -37,7 +38,7 @@ source('functions/fn_create_YE_lookup.R')
 source('functions/fn_create_dim_hierarchy.R')
 # takes a character vector and surrounds it with quotes hi --> "hi"
 source('functions/fn_quote.R')
-
+ 
 # PLAN OF ATTACK =====================================================================================
 
 # PREAMBLE (data relationships)
@@ -162,7 +163,7 @@ df_test_totals <- df_base_aggregates %>%
 stopifnot(as.integer(df_test_totals$Total_Nights) == 47421565)
 
 # clean up
-rm(df_combined, df_four_quarters, df_YE_all, df_chk_total)
+rm(df_combined, df_four_quarters, df_YE_all)
 
 
 
@@ -341,12 +342,12 @@ rm(data_name, vct_dim_names, vct_hierarchy_file_names, vct_dimension_file_names,
 		vct_index_names, vct_measure_names)
 
 # create a path to the output directory
-sub_path_to_output <- paste0("outputs", "/", "Table_", df_file_index$TableID)
+sub_path_to_output <- paste0("outputs", "/", str_cur_dir, "/", "Table_", df_file_index$TableID)
 curr_path <- getwd()
 
 # if the file path does not exist then create it
 str_full_path <- file.path(curr_path, sub_path_to_output)
-if (!file.exists(str_full_path)) dir.create(str_full_path)
+if (!file.exists(str_full_path)) dir.create(str_full_path, recursive = TRUE)
 
 
 # write the list of data.frames as csv files to "str_full_path"
@@ -360,31 +361,7 @@ invisible(lapply(seq_along(lst_output),
 		}))
 		
 		
-
-# compare outputs
-# the first is the sum of the text columns		
-lst_output$Data7578 %>% filter(Year_Ending == 45 & LOS_Group != 20 & 
-			Destination_RTO != 34 & Accommodation_Type != 35) %>%
-			mutate(tv = as.numeric(Total_Visitors), tt = as.numeric(Total_Trips),
-			tn = as.numeric(Total_Nights), tr = as.numeric(Total_Respondents)) %>%
-			summarise_each(funs(sum), tv, tt, tn, tr)
-			
-# the second is the sum of the numeric columns			
-df_test_totals
-
-		
 # clean up
 rm(curr_path, df_dimension_index, df_file_index, df_measure_index, 
 		lst_output, str_full_path, sub_path_to_output)
-
-
-
-
-
-
-
-
-
-
-
 

@@ -7,10 +7,11 @@
 ##    Author: 		   	Mark Hatcher (Sector Trends, December, 2015)
 ##					 	Using code snippets and algorithms used for exporting IVS data export
 ##						(see P:\OTSP\IVS\5.Dissemination\Quarterly_production_code\IVS_NZ.stat)
-##  
 
-# clear everything
-rm(list = ls())
+##	 Called by:			integrate.R
+
+# clear everything except location of current directory.
+rm(list = ls()[!(ls() %in% c("str_cur_dir"))])
 
 # load some libaries 
 library(dplyr)
@@ -395,13 +396,13 @@ rm(data_name, vct_dim_names, vct_hierarchy_file_names , vct_dimension_file_names
 
 
 # create a path to the output directory
-sub_path_to_output <- paste0("outputs", "/", "Table_", df_file_index$TableID)
+sub_path_to_output <- paste0("outputs", "/", str_cur_dir, "/", "Table_", df_file_index$TableID)
 curr_path <- getwd()
 
 # if the file path does not exist then create it                            
 str_full_path <- file.path(curr_path, sub_path_to_output)
-if (!file.exists(str_full_path)) dir.create(str_full_path)
 
+if (!file.exists(str_full_path)) dir.create(str_full_path, recursive = TRUE)
 # write the list of data.frames as csv files to "str_full_path"
 # invisible() supresses console output.
 invisible(lapply(seq_along(lst_output), 

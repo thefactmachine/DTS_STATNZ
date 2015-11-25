@@ -7,12 +7,12 @@
 ##    Author: 		   	Mark Hatcher (Sector Trends, December, 2015)
 ##					 	Using code snippets and algorithms used for exporting IVS data export
 ##						(see P:\OTSP\IVS\5.Dissemination\Quarterly_production_code\IVS_NZ.stat)
-##  
+##	 Called by:			integrate.R
+
+# clear everything except location of current directory.
+rm(list = ls()[!(ls() %in% c("str_cur_dir"))])
 
 
-
-# clear everything
-rm(list = ls())
 
 # load some libaries 
 library(dplyr)
@@ -384,40 +384,31 @@ vct_dimension_file_names <-
 vct_hierarchy_file_names <- 
 	paste0("DimenHierarchy", gsub("(\"|_)", "", df_dimension_index$DimensionCode), df_file_index$TableID)
 
-
-
-
-
-
 # these are always the same
 vct_index_names <- c("DimensionIndex", "MeasureIndex", "FileIndex")
-
 
 # assemble the above into a single vector and assign to the list
 vct_list_names <- c(data_name, vct_dimension_file_names, vct_hierarchy_file_names, vct_index_names)
 
-
 names(lst_output) <- vct_list_names
-
 
 # clean up
 rm(data_name, vct_dim_names, vct_hierarchy_file_names , vct_dimension_file_names, 
 		vct_index_names, vct_list_names, vct_measure_names)
 
 
-
-
-
 # (9.3) prepare / create output directory
-sub_path_to_output <- paste0("outputs", "/", "Table_", df_file_index$TableID)
-
-
+# create a path to the output directory
+sub_path_to_output <- paste0("outputs", "/", str_cur_dir, "/", "Table_", df_file_index$TableID)
 curr_path <- getwd()
+
+
 str_full_path <- file.path(curr_path, sub_path_to_output) 
 
 
 # if the file path does not exist then create it                            
-if (!file.exists(str_full_path)) dir.create(str_full_path)
+if (!file.exists(str_full_path)) dir.create(str_full_path, recursive = TRUE)
+
 
 
 #....and finally write the entire list to a set of csv files.
