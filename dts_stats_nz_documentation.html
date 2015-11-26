@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DTS to STATS NZ Documentation</title>
+</head>
+<body>
+<h1>DTS Stats NZ - Code Summary</h1>
+<h2>Document purpose</h2>
+<p>The purpose of this document is to provide a brief description regarding the operation of the code artifacts and data contained in this folder.</p>
+
+<h2>Code purpose</h2>
+<p>The purpose of this project was to create four data extracts for Statistics New Zealand of the Domestic Travel Survey which was discontinued in 2012.  It is then intended that Statistics New Zealand will then publish these data extracts on their website at the following location:</p>
+<a href="http://nzdotstat.stats.govt.nz/wbos/Index.aspx">NZ Stats publishing location</a>
+
+<p>Statistics New Zealand require these data extracts in a precise data format consisting of multiple tables (i.e. files) that support a central data file. This format of multiple files is approximately relational and resembles a star schema.</p>
+
+<a href="https://en.wikipedia.org/wiki/Star_schema">Star Schema Wikipedia reference</a>
+
+<h2>Output structure</h2>
+<p>The outputs are csv files and as mentioned there are multiple files associated with each data extract.  The outputs are stored in the parent folder “outputs”.  Each time the code is run a parent directory with the format YYYYMMDD-HHMM is created.  Underneath this folder, four folders are created with the names for each of the data extracts.  The data extracts are given a 4 digit name from 7578 to 7581 (inclusive).</p>
+
+<h3>Fact, Dimension and Measure tables</h3>
+<p>As mentioned, there are multiple files created for each data extract. The main ‘fact table’ (the file with the largest amount of data) is named with the prefix “Data” and the suffix is a four digit number that corresponds to each data extract.  For example, the fact table for data extract 7578 is called “Data7578.csv”.</p>
+
+<p>Each fact table contains columns which can be grouped into ‘dimensions’ or ‘measures’.  The measures contain categorical information. An example, of measure columns may be the time period or the geographical location – a measure column with the title Regional Tourism Office (RTO) may have a number of levels: in this case there are 32 levels that correspond to the 32 New Zealand RTOs. </p>
+
+<p>In contrast to a dimension column, a measure column contains numerical data associated with a combination of dimension levels.  For example, a measure column could be the ‘number of visitors’. The value of this columns would of course vary for the different combinations of dimension levels.</p>
+
+<h3>File structure</h3>
+<p>The levels for each dimension are recorded within the main fact table as numbers rather than character strings. For example, “Taranaki RTO” may be given a numerical value of 10.  To obtain a mapping between these numbers and their human-readable equivalents, lookup tables are used. There is one lookup table associated with each dimension. So, if a fact table has four dimension columns and three measure columns (7 columns in total) then there will be four dimension lookup tables (i.e. files). These files are pre-fixed with “DimenLookup”. An example of a file name for specific column is “DimenLookupDestinationRTO7579.csv". This file is for the dimension column “DestinationRTO” and which is contained in the 7589 data extract.</p>
+
+<h3>Additional files</h3>
+<p>In addition to the lookup files described in the previous paragraph, there are an additional two types of files.  These are briefly described below:</p>
+
+<h4>Hierarchy files</h4>
+<p>In addition to the dimension levels, an aggregate of all levels is created. For example, for the Destination_RTO dimension, an aggregate is created consisting of a total for all the 32 regions. Within the dimension lookup tables, this aggregated value is called “All” and is associated with a numerical value such as 34. All values less than 34 (i.e. 1 to 33) will map to components of this aggregate. The hierarchy files map this component to aggregate association. There is a hierarchy file associated with each dimension.</p>
+
+<h4>Index files</h4>
+<p>There are three types of index files:  dimension, measure and file. Both the dimension and measure index files provide mappings from the column names used in the fact table to more human readable names used for eventual publication.  An example is the dimension column called “POV” which maps to a more verbose (but understandable) “Purpose of visit”.  The file index table contains basic information about the data extract.</p>
+
+
+<h2>Aggregation structures</h2>
+<p>The various data extracts pre-compute a large number of aggregation combinations. This so that the Stats NZ website only fetches aggregates from a database without the need to perform dynamic computation.</p>
+
+<p>If for example, if there are three different dimension variables such as Year_End, Purpose_Of_Visit and Trip_Type; each of these may have a specific number of levels (i.e. distinct values).  For example, there maybe 53 different quarterly year end values; 24 purpose of visit values and 2 different of trip type values. The total potential combinations of these levels are: ( 53 x 24 x 2 ) = 2,544 combinations. However, in practice, given that only 15,000 people were surveyed each year, many of these combinations are not realised; therefore, the number of combinations contained in the data is likely to be significantly less than this theoretical maximum. Within the code, these combinations are referred to as base aggregates and these are output as lowest level of aggregation.</p>
+
+<p>These base aggregates are used to create additional aggregates. These additional aggregates are created by essentially ignoring various columns.  For example, the Purpose_Of_Visit and Trip_Type may be only considered with the value of Year_End explicitly set to “All”  This type of operation is performed for all columns. So, in addition to the base aggregate combinations which include combinations of all columns, the number of additional column combinations can be calculated by 2^ (number of columns) – 1.  In the case of three columns (as the previous example), the number of additional column combinations would be calculated as (2^3) -1 = 7. </p>
+
+
+<h2>Year end values</h2>
+<p>The data extracts from TRED report data for a particular three month period. This quarterly data is aggregated into rolling 12 month (i.e. annual) periods.  For example, the period ‘year ending September 2008’ would consist of the quarters: 2007 / Q4, 2008 / Q1, 2008 Q2 and 2008 Q3. The next two subsequent reporting periods would be ‘year ending December 2008’ and ‘year ending March 2009’.</p> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

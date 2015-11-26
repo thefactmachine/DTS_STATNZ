@@ -139,584 +139,110 @@ x
 unlist(lapply(trims, function(trim) mean(x, trim = trim)))
 unlist(lapply(rcauchy(1000), function(trim) mean(x, trim = trim)))
 ###
-##    Programme Name:  	create_accommodation_7578.R#
+##    Programme Name:  	integrate.R#
 ##	#
-##    Objective:      	To create a DTS accommodation export for Stats NZ#
+##    Objective:      	To call four scripts that create various Domestic Travel Survey outputs.#
 ###
 ###
 ##    Author: 		   	Mark Hatcher (Sector Trends, December, 2015)#
-##					 	Using code snippets and algorithms used for exporting IVS data export#
-##						(see P:\OTSP\IVS\5.Dissemination\Quarterly_production_code\IVS_NZ.stat)#
-##  #
 # clear everything#
 rm(list = ls())#
 #
-# load some libaries #
-library(dplyr)#
-library(stringr)#
-library(tidyr)#
-library(xlsx)#
+# supress warnings#
+options(warn=-1)#
 #
-options(stringsAsFactors = FALSE)#
-# do not display in scientific notation#
-options(scipen=999, digits = 10)#
+# create a string based on date (YYYYMMDD) and time (HHMM) for current folder#
+str_cur_dir <- format(Sys.time(), "%Y%m%d-%H%M")#
 #
 setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
 #
-# calculates "length of stay"#
-#source('functions/fn_calc_los.R')#
-# creates a data.frame of column combinations for use in a group_by#
-source('functions/fn_create_column_combinations.R')#
-# uses column combinations to create various group_by#
-source('functions/fn_create_comb_aggregates.R')#
-# appends columns to a data.frame such that resultant df is always 8 columns wide#
-source('functions/fn_create_df_with_all.R')#
-# appends a data.frame with four columns#
-source('functions/fn_create_year_end.R')#
-# converts floating point number to text#
-source('functions/fn_convert_to_text.R')#
-# creates  yearend lookup table#
-source('functions/fn_create_YE_lookup.R')#
-# takes a dimension lookup and creates a dimension hierarchy#
-source('functions/fn_create_dim_hierarchy.R')#
-# this is a collection of statements that changes a few values so it can join with "df_purpose_lu"#
-source('functions/fn_clean_trips.R')#
-# this function cleans up "vw_DTSTripSpend.csv" It removes "alcohol" from "Food and Alcohol"#
-source('functions/fn_clean_spend.R')#
-# loads a prepares an activity classification table#
-source('functions/fn_get_classification.R')#
-# takes a character vector and surrounds it with quotes hi --> "hi"#
-source('functions/fn_quote.R')#
-# PLAN OF ATTACK =====================================================================================#
-#
-# PREAMBLE (data relationships)#
-# relationship between df_trips & df_accomodation: a person makes a trip and...#
-# stays in accomodation. When a person makes a day trip there is no need for..#
-# accomodation. Therefore only "Overnight trips" are included #
-# A single trip can have multiple accomodation values as a person..#
-# can stay in different hotels in the same or different locations#
-#
-# BASIC CODE STEPS#
-# LOAD and process two CSV files (Quarterly data)#
-# AGGREGATE - From the quarterly data, aggregate these into quarterly year-ending summaries.#
-# FILTER the year ending summaries such that only whole years are included (first 3 quarters are not included)#
-# CREATE satellite tables and formats that are specifically required by Stats NZ - STATS NZ require data to be#
-# in a start schema configuration.#
-#
-# ====================================================================================================#
-#
-# LOAD and Prepare data#
-df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
-#
-df_trips <- df_trips %>% #
-		select(TripIDNumber, TripYear, TripQtr, TripType, DestinationRTO, SmoothedTripWeight) %>%#
-		rename(Total_Trips = SmoothedTripWeight)#
-#
-# convert those pesky NAs to zero.#
-df_trips[is.na(df_trips$Total_Trips) == TRUE, "Total_Trips"] <- 0#
-#
-# This function gets an XL spreasheet and cleans some values so it matches with df_activities#
-df_activity_classification <- fn_get_classification()#
-#
-df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE) %>%#
-			select(-AnswerNumber, -LegNumber)#
-#
-# clean up a rogue value#
-df_activities[df_activities$Activities == "Business   " ,  "Activities"] <- "Business"#
-#
-# append activity group to df_activies#
-df_activities <- df_activities %>% #
- 			inner_join(df_activity_classification, by = c("Activities" = "Activity")) %>%#
- 			select(TripID, Activity_Group, Activities)#
-df_combined <- inner_join(df_trips, df_activities, by = c("TripIDNumber" = "TripID"))#
-#========================================================================#
-# RECONCILIATION POINT. The following code snippet should reconcile to #
-# P:\OTSP\SAS\DTS\Output\2010Q3\reports\Est_Qtr_Trip_Type_Purpose.xls #
-# The number of trips is 8,465,427#
-#
-df_rec <- df_combined %>% filter(TripYear == 2010 & TripQtr == 3) %>% #
-			distinct(TripIDNumber) %>% summarise(total = sum(Total_Trips))#
-#
-stopifnot(round(df_rec$total, 0) == 8465427)#
-rm(df_rec, df_activity_classification)#
-#
-#========================================================================#
-#=============================================================================#
-# CREATE a data frame of complete years. #
-#
-# add 4 extra columns: (YEMar, YEJun, YESep, YEDec) These will be used in group by calculations #
-df_combined <- fn_create_year_end(df_combined)#
-#
-# Create four data frames with unique year ending values#
-df_YE_Mar <- df_combined %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
-df_YE_Jun <- df_combined %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
-df_YE_Sep <- df_combined %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
-df_YE_Dec <- df_combined %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
-# Stack the four data frames; include whole year values; select a single column#
-df_YE_all <- bind_rows(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec) %>%#
-			group_by(YE) %>% summarise(count = n()) %>% #
-			filter(count == 4) %>% select(YE)#
-# clean up			#
-rm(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec)#
-#=============================================================================#
-# CALCULATE Quarterly aggregates and rename columns#
-df_activity_qtrly <- df_combined %>% #
-						select(YEMar, YEJun, YESep, YEDec, Activity_Group, Total_Trips) %>% #
-						group_by(YEMar, YEJun, YESep, YEDec, Activity_Group) %>%#
-						summarise(Total_Activities = sum(Total_Trips), Raw_Count = n())#
-#
-#=============================================================================#
-# CREATE Year Ending aggregates and filter to include full ears#
-#
-# create a vector of 4 different columns stacked on top of each other#
-YE <- c(df_activity_qtrly$YEDec, df_activity_qtrly$YESep, df_activity_qtrly$YEJun, df_activity_qtrly$YEMar)#
-#
-# Duplicate the same dataframe four times and stack on top of each other#
-df_four_quarters <- rbind(df_activity_qtrly, df_activity_qtrly, df_activity_qtrly, df_activity_qtrly)#
-df_base_aggregates <- cbind(YE, df_four_quarters) %>%#
-	select(-c(YEDec, YESep, YEJun, YEMar))  %>%#
-	group_by(YE, Activity_Group) %>%#
-	summarise(Total_Activities = sum(Total_Activities), Raw_Count = sum(Raw_Count))  %>%  #
-	filter(YE %in% df_YE_all$YE)
-head(df_base_aggregates)
-nrow(df_base_aggregates)
+system.time(source('7578_create_accommodation.R', echo = FALSE))
 ###
-##    Programme Name:  	create_accommodation_7578.R#
+##    Programme Name:  	integrate.R#
 ##	#
-##    Objective:      	To create a DTS accommodation export for Stats NZ#
+##    Objective:      	To call four scripts that create various Domestic Travel Survey outputs.#
 ###
 ###
 ##    Author: 		   	Mark Hatcher (Sector Trends, December, 2015)#
-##					 	Using code snippets and algorithms used for exporting IVS data export#
-##						(see P:\OTSP\IVS\5.Dissemination\Quarterly_production_code\IVS_NZ.stat)#
-##  #
 # clear everything#
 rm(list = ls())#
 #
-# load some libaries #
-library(dplyr)#
-library(stringr)#
-library(tidyr)#
-library(xlsx)#
+# supress warnings#
+options(warn=-1)#
 #
-options(stringsAsFactors = FALSE)#
-# do not display in scientific notation#
-options(scipen=999, digits = 10)#
+# create a string based on date (YYYYMMDD) and time (HHMM) for current folder#
+str_cur_dir <- format(Sys.time(), "%Y%m%d-%H%M")#
 #
 setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
 #
-# calculates "length of stay"#
-#source('functions/fn_calc_los.R')#
-# creates a data.frame of column combinations for use in a group_by#
-source('functions/fn_create_column_combinations.R')#
-# uses column combinations to create various group_by#
-source('functions/fn_create_comb_aggregates.R')#
-# appends columns to a data.frame such that resultant df is always 8 columns wide#
-source('functions/fn_create_df_with_all.R')#
-# appends a data.frame with four columns#
-source('functions/fn_create_year_end.R')#
-# converts floating point number to text#
-source('functions/fn_convert_to_text.R')#
-# creates  yearend lookup table#
-source('functions/fn_create_YE_lookup.R')#
-# takes a dimension lookup and creates a dimension hierarchy#
-source('functions/fn_create_dim_hierarchy.R')#
-# this is a collection of statements that changes a few values so it can join with "df_purpose_lu"#
-source('functions/fn_clean_trips.R')#
-# this function cleans up "vw_DTSTripSpend.csv" It removes "alcohol" from "Food and Alcohol"#
-source('functions/fn_clean_spend.R')#
-# loads a prepares an activity classification table#
-source('functions/fn_get_classification.R')#
-# takes a character vector and surrounds it with quotes hi --> "hi"#
-source('functions/fn_quote.R')#
-# PLAN OF ATTACK =====================================================================================#
+system.time(source('7578_create_accommodation.R', echo = FALSE))
+# clear everything#
+rm(list = ls())#
 #
-# PREAMBLE (data relationships)#
-# relationship between df_trips & df_accomodation: a person makes a trip and...#
-# stays in accomodation. When a person makes a day trip there is no need for..#
-# accomodation. Therefore only "Overnight trips" are included #
-# A single trip can have multiple accomodation values as a person..#
-# can stay in different hotels in the same or different locations#
+# supress warnings#
+options(warn=-1)#
 #
-# BASIC CODE STEPS#
-# LOAD and process two CSV files (Quarterly data)#
-# AGGREGATE - From the quarterly data, aggregate these into quarterly year-ending summaries.#
-# FILTER the year ending summaries such that only whole years are included (first 3 quarters are not included)#
-# CREATE satellite tables and formats that are specifically required by Stats NZ - STATS NZ require data to be#
-# in a start schema configuration.#
+# create a string based on date (YYYYMMDD) and time (HHMM) for current folder#
+str_cur_dir <- format(Sys.time(), "%Y%m%d-%H%M")#
 #
-# ====================================================================================================#
+setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
 #
-# LOAD and Prepare data#
-df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
-#
-df_trips <- df_trips %>% #
-		select(TripIDNumber, TripYear, TripQtr, TripType, DestinationRTO, SmoothedTripWeight) %>%#
-		rename(Total_Trips = SmoothedTripWeight)#
-#
-# convert those pesky NAs to zero.#
-df_trips[is.na(df_trips$Total_Trips) == TRUE, "Total_Trips"] <- 0#
-#
-# This function gets an XL spreasheet and cleans some values so it matches with df_activities#
-df_activity_classification <- fn_get_classification()#
-#
-df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE) %>%#
-			select(-AnswerNumber, -LegNumber)#
-#
-# clean up a rogue value#
-df_activities[df_activities$Activities == "Business   " ,  "Activities"] <- "Business"#
-#
-# append activity group to df_activies#
-df_activities <- df_activities %>% #
- 			inner_join(df_activity_classification, by = c("Activities" = "Activity")) %>%#
- 			select(TripID, Activity_Group, Activities)#
-df_combined <- inner_join(df_trips, df_activities, by = c("TripIDNumber" = "TripID"))#
-#========================================================================#
-# RECONCILIATION POINT. The following code snippet should reconcile to #
-# P:\OTSP\SAS\DTS\Output\2010Q3\reports\Est_Qtr_Trip_Type_Purpose.xls #
-# The number of trips is 8,465,427#
-#
-df_rec <- df_combined %>% filter(TripYear == 2010 & TripQtr == 3) %>% #
-			distinct(TripIDNumber) %>% summarise(total = sum(Total_Trips))#
-#
-stopifnot(round(df_rec$total, 0) == 8465427)#
-rm(df_rec, df_activity_classification)#
-#
-#========================================================================#
-#=============================================================================#
-# CREATE a data frame of complete years. #
-#
-# add 4 extra columns: (YEMar, YEJun, YESep, YEDec) These will be used in group by calculations #
-df_combined <- fn_create_year_end(df_combined)#
-#
-# Create four data frames with unique year ending values#
-df_YE_Mar <- df_combined %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
-df_YE_Jun <- df_combined %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
-df_YE_Sep <- df_combined %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
-df_YE_Dec <- df_combined %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
-# Stack the four data frames; include whole year values; select a single column#
-df_YE_all <- bind_rows(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec) %>%#
-			group_by(YE) %>% summarise(count = n()) %>% #
-			filter(count == 4) %>% select(YE)#
-# clean up			#
-rm(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec)#
-#=============================================================================#
-# CALCULATE Quarterly aggregates and rename columns#
-df_activity_qtrly <- df_combined %>% #
-						select(YEMar, YEJun, YESep, YEDec, Activity_Group, Total_Trips) %>% #
-						group_by(YEMar, YEJun, YESep, YEDec, Activity_Group) %>%#
-						summarise(Total_Activities = sum(Total_Trips), Raw_Count = n())#
-#
-#=============================================================================#
-# CREATE Year Ending aggregates and filter to include full ears#
-#
-# create a vector of 4 different columns stacked on top of each other#
-YE <- c(df_activity_qtrly$YEDec, df_activity_qtrly$YESep, df_activity_qtrly$YEJun, df_activity_qtrly$YEMar)#
-#
-# Duplicate the same dataframe four times and stack on top of each other#
-df_four_quarters <- rbind(df_activity_qtrly, df_activity_qtrly, df_activity_qtrly, df_activity_qtrly)#
-df_base_aggregates <- cbind(YE, df_four_quarters) %>%#
-	select(-c(YEDec, YESep, YEJun, YEMar))  %>%#
-	group_by(YE, Activity_Group) %>%#
-	summarise(Total_Activities = sum(Total_Activities), Raw_Count = sum(Raw_Count))  %>%  #
-	filter(YE %in% df_YE_all$YE)
-df_base_aggregates
-sum(df_base_aggregates$Total_Activities)
-df_base_aggregates %>% filter(YE == "YEDec2000") %>% summarise(total = sum(Total_Activities))
-df_base_aggregates %>% filter(YE == "YEDec2000") %>% summarise(total = n())
-df_base_aggregates %>% filter(YE == "YEDec2000") %>% summarise(total = sum(Total_Activities))
-df_base_aggregates %>% filter(YE == "YEDec2000") %>% summarise(total = sum(Total_Activities))
-nrow(df_base_aggregates)
-df_base_aggregates[c(900, 2700),]
-stopifnot(as.integer(df_trips %>% filter(TripYear == 2010) %>% #
-	summarise(total = sum(Total_Trips))) == 44077294)#
-#
-# Following results in 23,330 activities (unweighted for YE 2010)#
-stopifnot(as.integer(df_base_aggregates %>% filter(YE == "YEDec2010") %>% #
-	summarise(total = sum(Raw_Count)) %>% select(total)) == 23330)#
-# Following produces 340349 - 23330 = 317019  (total unweighted activities)#
-stopifnot(df_combined %>% filter(TripYear != 2010) #
-	%>% summarise(total = n()) == 317019)#
-#
-# This total reconciles to source data (i.e 340,349 rows)#
-stopifnot(read.csv("data/vw_DTSVisitActivities.csv", header = TRUE) %>% #
-	summarise(count = n()) == 340349)#
-#
-# After doing the calculations above we dont need the "Raw_Count" column..#
-#
-df_base_aggregates <- df_base_aggregates %>% select(-Raw_Count)
-#=============================================================================#
-# CREATE various aggregate combinations#
-# There are two dimenions columns. The total number of group_by combinations of these are:#
-# 2^2 = 2.  1 of these has been previously created (see 'df_base_aggregates' )...#
-# the remaining 3 combinations are created below. Of these 3 combinations, 2 are created#
-# programmatically using a function call. The remaining combination is created as a single line of code#
-#
-# Assign the measure and dimension names...these will be used for column headings and also to:#
-# create values for DimensionIndex.csv and MeasureIndex.csv files and to create filenames.#
-vct_dim_names <- c("Year_Ending", "Activity_Group")#
-names(df_base_aggregates)[1:2] <- vct_dim_names#
-#
-vct_measure_names <- c("Total_Activities")#
-names(df_base_aggregates)[3] <- vct_measure_names#
-# Create a "summarise" clause (for multiple use later)#
-lst_aggregations <- as.list(paste0("sum(", vct_measure_names,")"))#
-lst_sum_clause <- setNames(lst_aggregations, vct_measure_names)#
-# Sort order of the columns#
-vct_col_sort <- c(vct_dim_names, vct_measure_names)#
-#
-# There are two columns resulting in 2^2 = 4 combinations...#
-# We now create 2 of these combinations#
-lst_combinations <- fn_create_column_combinations(vct_dim_names)#
-#
-# Create a list of data frames Each list element is a data frame#
-lst_aggregations <- lapply(lst_combinations, function(x) #
-	fn_create_comb_aggregates(df_base_aggregates, x, lst_sum_clause))#
-# ASSERT: length(lst_aggregations) == (2^length(vct_dim_names)) - 2#
-v_length <- length(vct_dim_names)#
-stopifnot(length(lst_aggregations) == sum(choose(v_length, 1:(v_length-1))))#
-rm(v_length)#
-# Combine the list of data frames into a single data frame#
-df_aggregations <- do.call(bind_rows, lst_aggregations) %>% as.data.frame()#
-# ASSERT: There are no NA's that have been introducted as a result of the above#
-stopifnot(nrow(df_aggregations[is.na(df_aggregations$Total_Activities),]) == 0)#
-# grand totals (This is a single row grand total)#
-df_totals <- df_base_aggregates %>% ungroup() %>% #
-				summarise_(.dots = lst_sum_clause) %>% #
-				fn_create_df_with_all(vct_dim_names, vct_col_sort)#
-# clean up#
-rm(fn_create_column_combinations, fn_create_comb_aggregates, fn_create_df_with_all)#
-rm(fn_create_year_end, lst_aggregations, lst_sum_clause, vct_col_sort)#
-#=============================================================================#
-#
-# Combine all aggregates into a single data frame#
-df_consolidated <- bind_rows(df_base_aggregates, df_aggregations, df_totals)
-sum(df_base_aggregates$Total_Activities)
+system.time(source('7578_create_accommodation.R', echo = FALSE))#
+system.time(source('7579_create_trips.R', echo = FALSE))#
+system.time(source('7580_create_spend.R', echo = FALSE))#
+system.time(source('7581_create_activity.R', echo = FALSE))#
+# turn warnings back on#
+options(warn=0)
 ###
-##    Programme Name:  	create_accommodation_7578.R#
+##    Programme Name:  	integrate.R#
 ##	#
-##    Objective:      	To create a DTS accommodation export for Stats NZ#
+##    Objective:      	To call four scripts that create various Domestic Travel Survey outputs.#
 ###
 ###
 ##    Author: 		   	Mark Hatcher (Sector Trends, December, 2015)#
-##					 	Using code snippets and algorithms used for exporting IVS data export#
-##						(see P:\OTSP\IVS\5.Dissemination\Quarterly_production_code\IVS_NZ.stat)#
-##  #
 # clear everything#
 rm(list = ls())#
 #
-# load some libaries #
-library(dplyr)#
-library(stringr)#
-library(tidyr)#
-library(xlsx)#
-#
-options(stringsAsFactors = FALSE)#
-# do not display in scientific notation#
-options(scipen=999, digits = 10)#
+# supress warnings#
+# create a string based on date (YYYYMMDD) and time (HHMM) for current folder#
+str_cur_dir <- format(Sys.time(), "%Y%m%d-%H%M")#
 #
 setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
 #
-# calculates "length of stay"#
-#source('functions/fn_calc_los.R')#
-# creates a data.frame of column combinations for use in a group_by#
-source('functions/fn_create_column_combinations.R')#
-# uses column combinations to create various group_by#
-source('functions/fn_create_comb_aggregates.R')#
-# appends columns to a data.frame such that resultant df is always 8 columns wide#
-source('functions/fn_create_df_with_all.R')#
-# appends a data.frame with four columns#
-source('functions/fn_create_year_end.R')#
-# converts floating point number to text#
-source('functions/fn_convert_to_text.R')#
-# creates  yearend lookup table#
-source('functions/fn_create_YE_lookup.R')#
-# takes a dimension lookup and creates a dimension hierarchy#
-source('functions/fn_create_dim_hierarchy.R')#
-# this is a collection of statements that changes a few values so it can join with "df_purpose_lu"#
-source('functions/fn_clean_trips.R')#
-# this function cleans up "vw_DTSTripSpend.csv" It removes "alcohol" from "Food and Alcohol"#
-source('functions/fn_clean_spend.R')#
-# loads a prepares an activity classification table#
-source('functions/fn_get_classification.R')#
-# takes a character vector and surrounds it with quotes hi --> "hi"#
-source('functions/fn_quote.R')#
-# PLAN OF ATTACK =====================================================================================#
+system.time(source('7578_create_accommodation.R', echo = FALSE))#
+system.time(source('7579_create_trips.R', echo = FALSE))#
+system.time(source('7580_create_spend.R', echo = FALSE))#
+system.time(source('7581_create_activity.R', echo = FALSE))
+###
+##    Programme Name:  	integrate.R#
+##	#
+##    Objective:      	To call four scripts that create various Domestic Travel Survey outputs.#
+###
+###
+##    Author: 		   	Mark Hatcher (Sector Trends, December, 2015)#
+# clear everything#
+rm(list = ls())#
 #
-# PREAMBLE (data relationships)#
-# relationship between df_trips & df_accomodation: a person makes a trip and...#
-# stays in accomodation. When a person makes a day trip there is no need for..#
-# accomodation. Therefore only "Overnight trips" are included #
-# A single trip can have multiple accomodation values as a person..#
-# can stay in different hotels in the same or different locations#
+# supress warnings#
+# create a string based on date (YYYYMMDD) and time (HHMM) for current folder#
+str_cur_dir <- format(Sys.time(), "%Y%m%d-%H%M")#
 #
-# BASIC CODE STEPS#
-# LOAD and process two CSV files (Quarterly data)#
-# AGGREGATE - From the quarterly data, aggregate these into quarterly year-ending summaries.#
-# FILTER the year ending summaries such that only whole years are included (first 3 quarters are not included)#
-# CREATE satellite tables and formats that are specifically required by Stats NZ - STATS NZ require data to be#
-# in a start schema configuration.#
+setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
 #
-# ====================================================================================================#
+#system.time(source('7578_create_accommodation.R', echo = FALSE))#
+#system.time(source('7579_create_trips.R', echo = FALSE))#
+#system.time(source('7580_create_spend.R', echo = FALSE))#
+system.time(source('7581_create_activity.R', echo = FALSE))
+# clear everything#
+rm(list = ls())#
 #
-# LOAD and Prepare data#
-df_trips <- read.csv("data/vw_DTSTrips.csv", header = TRUE)#
+# supress warnings#
+# create a string based on date (YYYYMMDD) and time (HHMM) for current folder#
+str_cur_dir <- format(Sys.time(), "%Y%m%d-%H%M")#
 #
-df_trips <- df_trips %>% #
-		select(TripIDNumber, TripYear, TripQtr, TripType, DestinationRTO, SmoothedTripWeight) %>%#
-		rename(Total_Trips = SmoothedTripWeight)#
+setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')#
 #
-# convert those pesky NAs to zero.#
-df_trips[is.na(df_trips$Total_Trips) == TRUE, "Total_Trips"] <- 0#
-#
-# This function gets an XL spreasheet and cleans some values so it matches with df_activities#
-df_activity_classification <- fn_get_classification()#
-#
-df_activities <- read.csv("data/vw_DTSVisitActivities.csv", header = TRUE) %>%#
-			select(-AnswerNumber, -LegNumber)#
-#
-# clean up a rogue value#
-df_activities[df_activities$Activities == "Business   " ,  "Activities"] <- "Business"#
-#
-# append activity group to df_activies#
-df_activities <- df_activities %>% #
- 			inner_join(df_activity_classification, by = c("Activities" = "Activity")) %>%#
- 			select(TripID, Activity_Group, Activities)#
-df_combined <- inner_join(df_trips, df_activities, by = c("TripIDNumber" = "TripID"))#
-#========================================================================#
-# RECONCILIATION POINT. The following code snippet should reconcile to #
-# P:\OTSP\SAS\DTS\Output\2010Q3\reports\Est_Qtr_Trip_Type_Purpose.xls #
-# The number of trips is 8,465,427#
-#
-df_rec <- df_combined %>% filter(TripYear == 2010 & TripQtr == 3) %>% #
-			distinct(TripIDNumber) %>% summarise(total = sum(Total_Trips))#
-#
-stopifnot(round(df_rec$total, 0) == 8465427)#
-rm(df_rec, df_activity_classification)#
-#
-#========================================================================#
-#=============================================================================#
-# CREATE a data frame of complete years. #
-#
-# add 4 extra columns: (YEMar, YEJun, YESep, YEDec) These will be used in group by calculations #
-df_combined <- fn_create_year_end(df_combined)#
-#
-# Create four data frames with unique year ending values#
-df_YE_Mar <- df_combined %>% select(TripQtr, YEMar) %>% distinct() %>% rename(YE = YEMar)#
-df_YE_Jun <- df_combined %>% select(TripQtr, YEJun) %>% distinct() %>% rename(YE = YEJun)#
-df_YE_Sep <- df_combined %>% select(TripQtr, YESep) %>% distinct() %>% rename(YE = YESep)#
-df_YE_Dec <- df_combined %>% select(TripQtr, YEDec) %>% distinct() %>% rename(YE = YEDec)#
-# Stack the four data frames; include whole year values; select a single column#
-df_YE_all <- bind_rows(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec) %>%#
-			group_by(YE) %>% summarise(count = n()) %>% #
-			filter(count == 4) %>% select(YE)#
-# clean up			#
-rm(df_YE_Mar, df_YE_Jun, df_YE_Sep, df_YE_Dec)#
-#=============================================================================#
-# CALCULATE Quarterly aggregates and rename columns#
-df_activity_qtrly <- df_combined %>% #
-						select(YEMar, YEJun, YESep, YEDec, Activity_Group, Total_Trips) %>% #
-						group_by(YEMar, YEJun, YESep, YEDec, Activity_Group) %>%#
-						summarise(Total_Activities = sum(Total_Trips), Raw_Count = n())#
-#
-#=============================================================================#
-# CREATE Year Ending aggregates and filter to include full ears#
-#
-# create a vector of 4 different columns stacked on top of each other#
-YE <- c(df_activity_qtrly$YEDec, df_activity_qtrly$YESep, df_activity_qtrly$YEJun, df_activity_qtrly$YEMar)#
-#
-# Duplicate the same dataframe four times and stack on top of each other#
-df_four_quarters <- rbind(df_activity_qtrly, df_activity_qtrly, df_activity_qtrly, df_activity_qtrly)#
-df_base_aggregates <- cbind(YE, df_four_quarters) %>%#
-	select(-c(YEDec, YESep, YEJun, YEMar))  %>%#
-	group_by(YE, Activity_Group) %>%#
-	summarise(Total_Activities = sum(Total_Activities), Raw_Count = sum(Raw_Count))  %>%  #
-	filter(YE %in% df_YE_all$YE)#
-#=============================================================================#
-#=============================================================================#
-# RECONCILIATION POINT. df_base_aggregates contains quarterly year ending values#
-# this means that each row is the sum of 4 quarters.  To reconcile these, four source#
-# files were aggregated. The four source files were:#
-#
-# P:\OTSP\SAS\DTS\Output\2010Q1\reports\Est_Qtr_Trip_Type_Purpose.xls#
-# P:\OTSP\SAS\DTS\Output\2010Q2\reports\Est_Qtr_Trip_Type_Purpose.xls#
-# P:\OTSP\SAS\DTS\Output\2010Q3\reports\Est_Qtr_Trip_Type_Purpose.xls#
-# P:\OTSP\SAS\DTS\Output\2010Q4\reports\Est_Qtr_Trip_Type_Purpose.xls#
-# see summary of the above reports at this location#
-# \workings\activity_YE_2010_Q4\Reconciliation_trips_to_activity.xlsx#
-#
-# NOTE: There are no SAS reports to directly reconcile to that record..#
-# activities.#
-#
-# Following reconciles to 44,077,294 (total for YE 2010)#
-#
-stopifnot(as.integer(df_trips %>% filter(TripYear == 2010) %>% #
-	summarise(total = sum(Total_Trips))) == 44077294)#
-#
-# Following results in 23,330 activities (unweighted for YE 2010)#
-stopifnot(as.integer(df_base_aggregates %>% filter(YE == "YEDec2010") %>% #
-	summarise(total = sum(Raw_Count)) %>% select(total)) == 23330)#
-# Following produces 340349 - 23330 = 317019  (total unweighted activities)#
-stopifnot(df_combined %>% filter(TripYear != 2010) #
-	%>% summarise(total = n()) == 317019)#
-#
-# This total reconciles to source data (i.e 340,349 rows)#
-stopifnot(read.csv("data/vw_DTSVisitActivities.csv", header = TRUE) %>% #
-	summarise(count = n()) == 340349)#
-#
-# After doing the calculations above we dont need the "Raw_Count" column..#
-#
-df_base_aggregates <- df_base_aggregates %>% select(-Raw_Count)#
-#
-#=============================================================================#
-# CREATE various aggregate combinations#
-# There are two dimenions columns. The total number of group_by combinations of these are:#
-# 2^2 = 2.  1 of these has been previously created (see 'df_base_aggregates' )...#
-# the remaining 3 combinations are created below. Of these 3 combinations, 2 are created#
-# programmatically using a function call. The remaining combination is created as a single line of code#
-#
-# Assign the measure and dimension names...these will be used for column headings and also to:#
-# create values for DimensionIndex.csv and MeasureIndex.csv files and to create filenames.#
-vct_dim_names <- c("Year_Ending", "Activity_Group")#
-names(df_base_aggregates)[1:2] <- vct_dim_names#
-#
-vct_measure_names <- c("Total_Activities")#
-names(df_base_aggregates)[3] <- vct_measure_names#
-# Create a "summarise" clause (for multiple use later)#
-lst_aggregations <- as.list(paste0("sum(", vct_measure_names,")"))#
-lst_sum_clause <- setNames(lst_aggregations, vct_measure_names)#
-# Sort order of the columns#
-vct_col_sort <- c(vct_dim_names, vct_measure_names)#
-#
-# There are two columns resulting in 2^2 = 4 combinations...#
-# We now create 2 of these combinations#
-lst_combinations <- fn_create_column_combinations(vct_dim_names)#
-#
-# Create a list of data frames Each list element is a data frame#
-lst_aggregations <- lapply(lst_combinations, function(x) #
-	fn_create_comb_aggregates(df_base_aggregates, x, lst_sum_clause))#
-# ASSERT: length(lst_aggregations) == (2^length(vct_dim_names)) - 2#
-v_length <- length(vct_dim_names)#
-stopifnot(length(lst_aggregations) == sum(choose(v_length, 1:(v_length-1))))#
-rm(v_length)#
-# Combine the list of data frames into a single data frame#
-df_aggregations <- do.call(bind_rows, lst_aggregations) %>% as.data.frame()#
-# ASSERT: There are no NA's that have been introducted as a result of the above#
-stopifnot(nrow(df_aggregations[is.na(df_aggregations$Total_Activities),]) == 0)#
-# grand totals (This is a single row grand total)#
-df_totals <- df_base_aggregates %>% ungroup() %>% #
-				summarise_(.dots = lst_sum_clause) %>% #
-				fn_create_df_with_all(vct_dim_names, vct_col_sort)#
-# clean up#
-rm(fn_create_column_combinations, fn_create_comb_aggregates, fn_create_df_with_all)#
-rm(fn_create_year_end, lst_aggregations, lst_sum_clause, vct_col_sort)#
-#=============================================================================#
-#
-# Combine all aggregates into a single data frame#
-df_consolidated <- bind_rows(df_base_aggregates, df_aggregations, df_totals)
-head(df_consolidated)
-df_consolidated %>% filter(Year_Ending == All)
-df_consolidated %>% filter(Year_Ending == "All")
-df_consolidated %>% filter(Activity_Group == "All")
-.0021 * 7000
-df_consolidated %>% filter(Activity_Group == "All" & Year_Ending == "All")
+system.time(source('7578_create_accommodation.R', echo = FALSE))#
+system.time(source('7579_create_trips.R', echo = FALSE))#
+system.time(source('7580_create_spend.R', echo = FALSE))#
+system.time(source('7581_create_activity.R', echo = FALSE))

@@ -21,7 +21,6 @@ options(stringsAsFactors = FALSE)
 # do not display in scientific notation
 options(scipen=999, digits = 10)
 
-setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')
 
 # creates a data.frame of column combinations for use in a group_by
 source('functions/fn_create_column_combinations.R')
@@ -137,10 +136,6 @@ df_base_aggregates <- cbind(YE, df_four_quarters) %>%
 
 
 
-
-
-
-
 # RECONCILIATION POINT. df_base_aggregates contains quarterly year ending values
 # this means that each row is the sum of 4 quarters.  To reconcile these, four source
 # files were aggregated. The four source files were:
@@ -240,6 +235,10 @@ rm(fn_convert_to_text)
 # Created sorted list of unique values but with "All" on the end
 
 # (1) Create Lookup for POV_Group
+
+# convert from dplyr object to data.frame
+df_fin <- as.data.frame(df_fin)
+
 vct_POV_Group_desc <- c(sort(unique(df_fin[df_fin$POV_Group != "All", "POV_Group"])), "All")
 vct_codes <- 1:length(vct_POV_Group_desc)
 df_lu_POV_Group <- data.frame(Code = vct_codes, Description = vct_POV_Group_desc,  SortOrder = vct_codes)

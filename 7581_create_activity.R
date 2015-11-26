@@ -1,13 +1,13 @@
 ##
-##    Programme Name:  	create_accommodation_7578.R
+##    Programme Name:    create_accommodation_7578.R
 ##	
-##    Objective:      	To create a DTS accommodation export for Stats NZ
+##    Objective:         To create a DTS accommodation export for Stats NZ
 ##
 ##
-##    Author: 		   	Mark Hatcher (Sector Trends, December, 2015)
-##					 	Using code snippets and algorithms used for exporting IVS data export
-##						(see P:\OTSP\IVS\5.Dissemination\Quarterly_production_code\IVS_NZ.stat)
-##	 Called by:			integrate.R
+##    Author:           Mark Hatcher (Sector Trends, December, 2015)
+##	                    Using code snippets and algorithms used for exporting IVS data export
+##	                    (see P:\OTSP\IVS\5.Dissemination\Quarterly_production_code\IVS_NZ.stat)
+##	 Called by:         integrate.R
 
 # clear everything except location of current directory.
 rm(list = ls()[!(ls() %in% c("str_cur_dir"))])
@@ -24,7 +24,6 @@ options(stringsAsFactors = FALSE)
 # do not display in scientific notation
 options(scipen=999, digits = 10)
 
-setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')
 
 # calculates "length of stay"
 #source('functions/fn_calc_los.R')
@@ -280,6 +279,10 @@ rm(fn_convert_to_text)
 #=============================================================================
 # LOOKUPS
 # Create lookups for the dimension tables
+
+# convert from dplyr object to data.frame
+df_fin <- as.data.frame(df_fin)
+
 # (1) Create YE Look ups
 df_lu_YE <- fn_create_YE_lookup(df_fin$Year_Ending) %>% as.data.frame()
 

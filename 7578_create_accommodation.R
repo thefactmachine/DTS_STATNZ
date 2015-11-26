@@ -1,14 +1,14 @@
 ##
-##    Programme Name:  	create_accommodation_7578.R
+##    Programme Name:     create_accommodation_7578.R
 ##	
-##    Objective:      	To create a DTS accommodation export for Stats NZ
+##    Objective:           To create a DTS accommodation export for Stats NZ
 ##
 ##
-##    Author: 		   	Mark Hatcher (Sector Trends, December, 2015)
-##					 	Using code snippets and algorithms used for exporting IVS data export
-##						(see P:\OTSP\IVS\5.Dissemination\Quarterly_production_code\IVS_NZ.stat)
+##    Author:              Mark Hatcher (Sector Trends, December, 2015)
+##	                       Using code snippets and algorithms used for exporting IVS data export
+##	                       (see P:\OTSP\IVS\5.Dissemination\Quarterly_production_code\IVS_NZ.stat)
 ##   
-##	 Called by:			integrate.R
+##	 Called by:            integrate.R
 
 # clear everything except location of current directory.
 rm(list = ls()[!(ls() %in% c("str_cur_dir"))])
@@ -19,7 +19,9 @@ library(stringr)
 options(stringsAsFactors = FALSE)
 # do not display in scientific notation
 options(scipen=999, digits = 10)
-setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')
+
+#setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')
+
 # calculates "length of stay" - chops length of stay up into discreate units.
 source('functions/fn_calc_los.R')
 # creates a data.frame of column combinations for use in a group_by

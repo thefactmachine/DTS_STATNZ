@@ -22,7 +22,7 @@ options(stringsAsFactors = FALSE)
 # do not display in scientific notation
 options(scipen=999, digits = 10)
 
-setwd('/Users/zurich/Documents/TEMP-FILES/MBIE/DTS_STATNZ')
+
 
 # creates a data.frame of column combinations for use in a group_by
 source('functions/fn_create_column_combinations.R')
@@ -253,6 +253,11 @@ rm(fn_convert_to_text_two_decimals)
 #=============================================================================
 # LOOKUPS
 # Create 6 lookups for each of the dimension variables
+
+# convert from dplyr object to data.frame
+df_fin <- as.data.frame(df_fin)
+
+
 # (1) Create YE Look ups
 df_lu_YE <- fn_create_YE_lookup(df_fin$Year_Ending) %>% as.data.frame()
 
